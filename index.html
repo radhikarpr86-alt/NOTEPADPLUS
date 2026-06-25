@@ -6,8 +6,10 @@
   <meta name="theme-color" content="#0a0a1a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="Notepad+ Code Storage - Simpan, kelola, dan gabungkan kode HTML">
   <title>Notepad+ Code Storage v3.3</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a1a'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-size='60' fill='%23ffffff'%3E📝%3C/text%3E%3C/svg%3E">
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk5vdGVwYWQrIENvZGUgU3RvcmFnZSIsCiAgInNob3J0X25hbWUiOiAiTm90ZXBhZCsiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwYTBhMWEiLAogICJ0aGVtZV9jb2xvciI6ICIjMGEwYTFhIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3JlY3Qgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnIHJ4PScyMCcgZmlsbD0nJTIzMGEwYTFhJy8lM0UlM0N0ZXh0IHg9JzUwJyB5PSc2OCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc2MCcgZmlsbD0nJTIzZmZmZmZmJyUzRSZwIzEyODIwMzs8L3RleHQlM0UlM0Mvc3ZnJTNFIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfQogIF0KfQ==">
   <style>
     /* ============================================================
        NOTEPAD+ CODE STORAGE v3.3 - MAIN STYLESHEET
@@ -1031,6 +1033,31 @@
 // NOTEPAD+ CODE STORAGE v3.3 - COMPLETE JAVASCRIPT
 // ============================================================
 
+// ---------- PWA INSTALL PROMPT ----------
+var deferredPrompt;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+
+function installApplication() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(choiceResult) {
+      if (choiceResult.outcome === 'accepted') {
+        showToast('Instalasi berhasil! Aplikasi bisa dibuka dari layar utama.', 'success');
+      }
+      deferredPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+    });
+  } else if (window.matchMedia('(display-mode: standalone)').matches) {
+    showToast('Aplikasi sudah terinstall!', 'warning');
+  } else {
+    alert('Buka menu browser lalu pilih "Tambahkan ke Layar Utama" atau "Install" untuk menginstal aplikasi ini.');
+  }
+}
+
 // ---------- SERVICE WORKER (OFFLINE SUPPORT) ----------
 if ('serviceWorker' in navigator) {
   var swCode = `
@@ -1282,7 +1309,6 @@ function saveProfile() {
   updateHeaderUser(); setTimeout(function(){ closeModal('profileModal'); },1500);
 }
 function deleteAccount() {
-  // Jangan izinkan superadmin
   var s = getSession();
   if (!s || s.role === 'superadmin') return;
   showConfirm('Hapus Akun?','Semua data Anda akan hilang permanen.',function(){
@@ -1538,7 +1564,10 @@ function showSuperAdminPanel() {
   switchAdminTab('codes');
   refreshAllAdminTabs();
 }
-
+function refreshAllAdminTabs() {
+  renderActiveCodesList();
+  // Tab yang lain akan dirender saat dibuka
+}
 function switchAdminTab(tab) {
   document.querySelectorAll('.admin-tab-content').forEach(function(el){ el.classList.add('hidden'); });
   document.getElementById('adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.remove('hidden');
@@ -1766,10 +1795,7 @@ function downloadForOffline() {
   var a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='NotepadPlus_v3.3_Offline.html';
   a.click(); showToast('File offline didownload.','success');
 }
-function installApplication() {
-  if (window.matchMedia('(display-mode: standalone)').matches) showToast('Sudah terinstall!','warning');
-  else alert('Buka menu browser lalu pilih "Tambahkan ke Layar Utama" atau "Install".');
-}
+
 function updateOnlineStatus() {
   var badge = document.getElementById('connectionBadge');
   var off = document.getElementById('offlineBanner');
