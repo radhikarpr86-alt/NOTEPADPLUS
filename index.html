@@ -392,63 +392,101 @@
   </div>
 
 <!-- ============================================================
-     BLOK 2 (R3) - FITUR & PAKET LANDING + TOMBOL GOOGLE DRIVE
+     BLOK 3 R4 – APPLICATION PAGE TOOLBAR
+     Revisi 4: Tambah tombol Backup Sebelum Upgrade
+     Semua tombol asli R3 tetap utuh, tidak diubah
      ============================================================ -->
-  <h3 class="section-title">Fitur Unggulan</h3>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">📁</div>
-      <h4>Penyimpanan Tak Terbatas</h4>
-      <p>Simpan aplikasi dan kode HTML tanpa batasan jumlah.</p>
+<!-- APPLICATION PAGE -->
+<div class="container hidden" id="applicationPage">
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">📝</span>
+      <span class="logo-text">Notepad+ v3.3</span>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔄</div>
-      <h4>Gabung Otomatis</h4>
-      <p>Gabungkan semua kode menjadi 1 file index.html siap pakai.</p>
+    <div class="header-buttons">
+      <button onclick="toggleTheme()" id="themeButton2" class="btn btn-gray btn-sm">🌙 Dark Mode</button>
+      <button onclick="showProfileModal()" id="profileButton" class="btn btn-outline btn-sm hidden">Profil</button>
+      <button onclick="showSuperAdminPanel()" id="adminButton" class="btn btn-warning btn-sm hidden">Panel Admin</button>
+      <div class="user-badge" id="userBadge" style="display:none;">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span class="user-name" id="userNameDisplay">User</span>
+      </div>
+      <button onclick="handleLogout()" id="logoutButton" class="btn btn-danger btn-sm hidden">Logout</button>
+      <button onclick="goToLandingPage()" class="btn btn-gray btn-sm">Halaman Utama</button>
+      <button onclick="downloadForOffline()" class="btn btn-blue btn-sm">Download Offline</button>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔐</div>
-      <h4>Aktivasi Premium</h4>
-      <p>Sistem kode aktivasi yang dikelola oleh Super Admin.</p>
+  </header>
+
+  <div class="stats-grid" id="dashboardStats">
+    <div class="stat-card">
+      <div class="stat-value" id="statTotalApps">0</div>
+      <div class="stat-label">Total Aplikasi</div>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">👥</div>
-      <h4>Multi User</h4>
-      <p>Setiap pengguna memiliki akun dan data masing‑masing.</p>
+    <div class="stat-card">
+      <div class="stat-value" id="statTotalCodes">0</div>
+      <div class="stat-label">Total Code</div>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">☁️</div>
-      <h4>Simpan ke Google Drive</h4>
-      <p>Backup data langsung ke Google Drive atau memori HP.</p>
+    <div class="stat-card">
+      <div class="stat-value" id="statStorage">0 KB</div>
+      <div class="stat-label">Penyimpanan</div>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">📱</div>
-      <h4>Install Desktop</h4>
-      <p>Install sebagai aplikasi desktop di Windows, Mac, atau Linux.</p>
+    <div class="stat-card">
+      <div class="stat-value" id="statTotalUsers">0</div>
+      <div class="stat-label">Total User</div>
+    </div>
+    <div class="stat-card" style="border-color:#7c3aed;">
+      <div class="stat-value" id="statPremiumStatus">Free</div>
+      <div class="stat-label" id="statPremiumLabel">Status Akun</div>
     </div>
   </div>
 
-  <h3 class="section-title">Paket Aktivasi Premium</h3>
-  <div class="price-grid" id="landingPriceGrid">
-    <!-- Diisi oleh JavaScript -->
-  </div>
-
-  <!-- ========== TOMBOL SIMPAN KE GOOGLE DRIVE / MEMORI ========== -->
-  <div style="text-align:center;margin:30px 0;">
-    <button class="btn btn-lg" style="background:#4285F4;color:#fff;" onclick="saveToGoogleDrive()">
-      ☁️ Simpan Data ke Google Drive / Memori
+  <!-- ========== TOOLBAR BLOK 3 R4 ========== -->
+  <div class="toolbar">
+    <button onclick="showAddAppModal()" class="btn btn-success">Tambah Aplikasi</button>
+    <button onclick="toggleSearch()" class="btn btn-primary">Cari</button>
+    <button onclick="exportAllData()" class="btn btn-warning">Export Data</button>
+    <button onclick="document.getElementById('importFileInput').click()" class="btn btn-blue">Import Data</button>
+    <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importAllData(this)">
+    <button onclick="showMergeModal()" class="btn btn-primary" id="mergeButton">
+      Gabung & Copy <span class="badge badge-purple">Premium</span>
     </button>
-    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;">
-      Backup semua data Anda ke Google Drive atau simpan di memori HP.
-    </p>
+    <button onclick="showActivationModal()" class="btn btn-warning" id="activationToolbarButton" style="display:none;">🔑 Aktivasi Premium</button>
+    <button onclick="showChatModal()" class="btn btn-blue" id="chatButton">💬 Chat Admin</button>
+    <button onclick="showUserChatModal()" class="btn btn-info" id="chatUserButton">👥 Chat User</button>
+
+    <!-- TAMBAHAN BLOK 3 R3: BACKUP & RESTORE UNTUK USER -->
+    <button onclick="backupUserData()" class="btn btn-success" style="background:#4285F4;">💾 Backup Data</button>
+    <label class="btn btn-warning" style="cursor:pointer;margin:0;">
+      📤 Restore Data
+      <input type="file" id="restoreFileInput" accept=".json" hidden onchange="restoreUserData(this)">
+    </label>
+
+    <!-- TAMBAHAN BLOK 3 R4: BACKUP SEBELUM UPGRADE -->
+    <button onclick="backupSebelumUpgrade()" class="btn btn-orange">📦 Backup Upgrade</button>
+    <!-- AKHIR TAMBAHAN -->
+  </div>
+  <!-- ========== AKHIR TOOLBAR ========== -->
+
+  <div id="searchBar" class="hidden" style="margin-bottom:20px;">
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="searchInput" placeholder="Cari aplikasi atau kode..." style="flex:2;" oninput="performSearch()">
+      <button onclick="clearSearch()" class="btn btn-gray btn-sm">Clear</button>
+    </div>
   </div>
 
-  <!-- ========== IKLAN LANDING PAGE ========== -->
-  <div id="landingAdContainer" style="max-width:1000px;margin:0 auto 30px auto;padding:0 var(--spacing-lg);">
-    <!-- Diisi oleh renderLandingAd() -->
+  <div id="appListContainer"></div>
+
+  <div id="emptyState" class="empty-state">
+    <div class="empty-state-icon">📝</div>
+    <h3>Belum Ada Aplikasi</h3>
+    <p>Mulai tambahkan aplikasi dan kode HTML Anda sekarang.</p>
+    <button onclick="showAddAppModal()" class="btn btn-success">Tambah Aplikasi Pertama</button>
   </div>
 </div>
-<!-- END LANDING PAGE -->
+<!-- END APPLICATION PAGE -->
+<!-- ============================================================
+     AKHIR BLOK 3 R4
+     ============================================================ -->
 
 <!-- ============================================================
      BLOK 3 R3 – APPLICATION PAGE TOOLBAR
@@ -1313,10 +1351,10 @@ function activatePremium(code, errId, sucId) {
 </script>
 
 <!-- ============================================================
-     BLOK 9 R4 – JS CORE 2
-     Revisi 4: Auto-save data ke localStorage + sessionStorage,
-     validasi data user saat login, perbaikan data hilang
-     Semua fungsi asli R3 tetap utuh, tidak diubah
+     BLOK 9 R5 – JS CORE 2
+     Revisi 5: Penyimpanan ganda (ID + username), auto-save,
+     backup sebelum upgrade, perbaikan data hilang
+     Semua fungsi asli R4 tetap utuh, tidak diubah
      ============================================================ -->
 <script>
 // ---------- FORGOT PASSWORD ----------
@@ -1366,6 +1404,9 @@ function deleteAccount() {
   showConfirm('Hapus Akun?','Semua data Anda akan hilang permanen.',function(){
     var users = getAllUsers().filter(function(x){return x.id!==s.id;}); saveAllUsers(users);
     var apps = getAllApps(); delete apps[s.id]; saveAllApps(apps);
+    localStorage.removeItem('np_userdata_' + s.username);
+    sessionStorage.removeItem('np_autosave_' + s.id);
+    sessionStorage.removeItem('np_autosave_user_' + s.username);
     clearSession(); closeModal('profileModal'); goToLandingPage(); updateHeaderUser(); showToast('Akun dihapus.','warning');
   });
 }
@@ -1376,7 +1417,6 @@ function updateHeaderUser() {
   var badge = document.getElementById('userBadge'), prof = document.getElementById('profileButton');
   var adm = document.getElementById('adminButton'), logout = document.getElementById('logoutButton');
   var merge = document.getElementById('mergeButton'), act = document.getElementById('activationToolbarButton');
-
   var chatAdminBtn = document.getElementById('chatButton');
   var chatUserBtn = document.getElementById('chatUserButton');
 
@@ -1439,7 +1479,7 @@ function saveApplication() {
     userApps.push({ id:Date.now().toString(), name:name, desc:desc, codes:[], createdAt:new Date().toISOString() });
   }
   all[s.id]=userApps; saveAllApps(all);
-  autoSaveData(); // AUTO-SAVE
+  autoSaveData();
   closeModal('appModal'); refreshAppUI(); updateStats(); showToast('Aplikasi tersimpan!','success');
 }
 function editApp(id) {
@@ -1487,7 +1527,7 @@ function saveCode() {
     app.codes.push({ id:Date.now().toString(), name:name, content:content, createdAt:new Date().toISOString() });
   }
   all[s.id]=apps; saveAllApps(all);
-  autoSaveData(); // AUTO-SAVE
+  autoSaveData();
   closeModal('codeModal'); refreshAppUI(); updateStats(); showToast('Kode tersimpan!','success');
 }
 function deleteCode(appId,codeId) {
@@ -1514,9 +1554,7 @@ function downloadAllCodes(appId) {
     showToast('Tidak ada kode untuk didownload.', 'warning');
     return;
   }
-
   var codes = app.codes.slice();
-  
   codes.sort(function(a, b) {
     var nameA = a.name || '';
     var nameB = b.name || '';
@@ -1529,18 +1567,14 @@ function downloadAllCodes(appId) {
     if (!isNaN(numB)) return 1;
     return nameA.localeCompare(nameB);
   });
-
   var mergedContent = '';
   for (var i = 0; i < codes.length; i++) {
     var code = codes[i];
     var codeName = code.name || ('Code ' + (i + 1));
     mergedContent += '<!-- ===== ' + codeName + ' ===== -->\n';
     mergedContent += code.content;
-    if (i < codes.length - 1) {
-      mergedContent += '\n\n';
-    }
+    if (i < codes.length - 1) { mergedContent += '\n\n'; }
   }
-
   var blob = new Blob([mergedContent], { type: 'text/html' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
@@ -1550,23 +1584,31 @@ function downloadAllCodes(appId) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  setTimeout(function() {
-    URL.revokeObjectURL(url);
-  }, 1000);
-  
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
   showToast('✅ Semua kode digabung & didownload sebagai 1 file!', 'success');
 }
 
 // ---------- RENDER APP LIST ----------
 function refreshAppUI() {
   var s = getSession();
+  if (!s) {
+    document.getElementById('appListContainer').innerHTML = '';
+    document.getElementById('emptyState').classList.remove('hidden');
+    return;
+  }
+  var all = getAllApps();
+  var userApps = all[s.id] || [];
+  if (userApps.length === 0) {
+    var usernameData = localStorage.getItem('np_userdata_' + s.username);
+    if (usernameData) {
+      try { userApps = JSON.parse(usernameData); all[s.id] = userApps; saveAllApps(all); } catch (e) {}
+    }
+  }
   var cont = document.getElementById('appListContainer');
   var empty = document.getElementById('emptyState');
-  var apps = s ? (getAllApps()[s.id] || []) : [];
-  if (apps.length === 0) { cont.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  if (userApps.length === 0) { cont.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-
-  apps.sort(function(a, b) {
+  userApps.sort(function(a, b) {
     var matchA = a.name.match(/(\d+)/);
     var matchB = b.name.match(/(\d+)/);
     var numA = matchA ? parseInt(matchA[1]) : NaN;
@@ -1576,8 +1618,7 @@ function refreshAppUI() {
     if (!isNaN(numB)) return 1;
     return a.name.localeCompare(b.name);
   });
-
-  cont.innerHTML = apps.map(function(app) {
+  cont.innerHTML = userApps.map(function(app) {
     var codes = app.codes || [];
     codes.sort(function(c, d) {
       var matchC = c.name.match(/(\d+)/);
@@ -1589,7 +1630,6 @@ function refreshAppUI() {
       if (!isNaN(numD)) return 1;
       return c.name.localeCompare(d.name);
     });
-
     return '<div class="app-item">'+
       '<div class="app-header" onclick="toggleAppCodes(\''+app.id+'\')">'+
         '<div class="app-name">📁 '+escapeHTML(app.name)+' <span class="app-code-count">'+codes.length+' kode</span></div>'+
@@ -1701,17 +1741,11 @@ function checkAllExpiredActivations() {
   }else{ warn.classList.remove('show'); }
 }
 
-/* ================================================================
-   TAMBAHAN BLOK 9 R3 – BACKUP/RESTORE USER + PERBAIKAN DATA HILANG
-   ================================================================ */
+// ---------- BACKUP/RESTORE USER ----------
 function backupUserData() {
   var s = getSession(); if (!s) return showToast('Login dulu!','error');
   var apps = getAllApps()[s.id] || [];
-  var data = {
-    apps: apps,
-    exportedAt: new Date().toISOString(),
-    user: s.username
-  };
+  var data = { apps: apps, exportedAt: new Date().toISOString(), user: s.username };
   var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1719,7 +1753,6 @@ function backupUserData() {
   a.click();
   showToast('✅ Backup data berhasil didownload!', 'success');
 }
-
 function restoreUserData(input) {
   var s = getSession(); if (!s) return;
   var file = input.files[0]; if (!file) return;
@@ -1735,156 +1768,137 @@ function restoreUserData(input) {
       refreshAppUI();
       updateStats();
       showToast('✅ Data berhasil dipulihkan!', 'success');
-    } catch (ex) {
-      showToast('❌ Format file tidak valid.', 'error');
-    }
+    } catch (ex) { showToast('❌ Format file tidak valid.', 'error'); }
   };
   reader.readAsText(file);
   input.value = '';
 }
 
 /* ================================================================
-   TAMBAHAN BLOK 9 R4 – AUTO-SAVE + SYNC SESSION STORAGE + VALIDASI LOGIN
+   BLOK 9 R5 – PENYIMPANAN GANDA + AUTO-SAVE + BACKUP UPGRADE
    ================================================================ */
-
-// ---------- AUTO-SAVE: simpan ke localStorage & sessionStorage ----------
 function autoSaveData() {
   try {
     var s = getSession();
     if (!s) return;
-    // Data sudah tersimpan via saveAllApps() di setiap fungsi CRUD.
-    // Fungsi ini sebagai double-safety: pastikan data juga di-sync ke sessionStorage.
     var all = getAllApps();
     var userData = all[s.id] || [];
+    localStorage.setItem('np_userdata_' + s.username, JSON.stringify(userData));
     sessionStorage.setItem('np_autosave_' + s.id, JSON.stringify(userData));
-    // Update timestamp
-    sessionStorage.setItem('np_autosave_time_' + s.id, new Date().toISOString());
-  } catch (e) {
-    console.warn('Auto-save gagal:', e);
-  }
+    sessionStorage.setItem('np_autosave_user_' + s.username, JSON.stringify(userData));
+    var now = new Date().toISOString();
+    sessionStorage.setItem('np_autosave_time_' + s.id, now);
+    localStorage.setItem('np_lastsave_' + s.username, now);
+  } catch (e) { console.warn('Auto-save gagal:', e); }
 }
 
-// ---------- VALIDASI & PULL DATA DARI SESSION STORAGE SAAT LOGIN ----------
 function validateAndLoadUserData() {
   var s = getSession();
   if (!s) return;
-  
   var all = getAllApps();
   var userData = all[s.id];
-  
-  // Jika data tidak ada di localStorage, coba ambil dari sessionStorage
-  if (!userData || !Array.isArray(userData)) {
+  var found = false;
+  if (userData && Array.isArray(userData) && userData.length > 0) { found = true; }
+  if (!found) {
     try {
-      var saved = sessionStorage.getItem('np_autosave_' + s.id);
-      if (saved) {
-        userData = JSON.parse(saved);
-        all[s.id] = userData;
-        saveAllApps(all);
-        console.log('✅ Data user ' + s.username + ' dipulihkan dari sessionStorage.');
-      } else {
-        // Buat data kosong
-        all[s.id] = [];
-        saveAllApps(all);
-        console.log('📝 Data user ' + s.username + ' diinisialisasi (kosong).');
+      var savedByUsername = localStorage.getItem('np_userdata_' + s.username);
+      if (savedByUsername) {
+        userData = JSON.parse(savedByUsername);
+        if (Array.isArray(userData) && userData.length > 0) { all[s.id] = userData; saveAllApps(all); found = true; }
       }
-    } catch (e) {
-      all[s.id] = [];
-      saveAllApps(all);
-    }
-  } else {
-    // Data ada di localStorage, sync ke sessionStorage
-    try {
-      sessionStorage.setItem('np_autosave_' + s.id, JSON.stringify(userData));
     } catch (e) {}
   }
+  if (!found) {
+    try {
+      var savedById = sessionStorage.getItem('np_autosave_' + s.id);
+      if (savedById) {
+        userData = JSON.parse(savedById);
+        if (Array.isArray(userData) && userData.length > 0) { all[s.id] = userData; saveAllApps(all); found = true; }
+      }
+    } catch (e) {}
+  }
+  if (!found) {
+    try {
+      var savedByUsername2 = sessionStorage.getItem('np_autosave_user_' + s.username);
+      if (savedByUsername2) {
+        userData = JSON.parse(savedByUsername2);
+        if (Array.isArray(userData) && userData.length > 0) { all[s.id] = userData; saveAllApps(all); found = true; }
+      }
+    } catch (e) {}
+  }
+  if (!found) { all[s.id] = []; saveAllApps(all); autoSaveData(); }
+  else { autoSaveData(); }
 }
 
-// ---------- OVERRIDE openApplication UNTUK VALIDASI DATA ----------
-var _originalOpenApplicationV2 = window.openApplication;
+window.backupSebelumUpgrade = function() {
+  var allData = {};
+  for (var i = 0; i < localStorage.length; i++) {
+    var key = localStorage.key(i);
+    if (key.startsWith('np_')) { allData[key] = localStorage.getItem(key); }
+  }
+  allData['_sessionStorage'] = {};
+  for (var j = 0; j < sessionStorage.length; j++) {
+    var sKey = sessionStorage.key(j);
+    if (sKey.startsWith('np_')) { allData['_sessionStorage'][sKey] = sessionStorage.getItem(sKey); }
+  }
+  var blob = new Blob([JSON.stringify(allData, null, 2)], {type: 'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'notepad_full_backup_upgrade_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  showToast('✅ Backup penuh berhasil! Simpan file ini sebelum upgrade.', 'success');
+};
+
+var _originalOpenApplicationV3 = window.openApplication;
 window.openApplication = function() {
   var s = getSession();
   if (!s) return showLoginModal();
-  
-  // Validasi dan muat data user
   validateAndLoadUserData();
-  
-  // Lanjutkan ke fungsi asli
-  _originalOpenApplicationV2();
+  _originalOpenApplicationV3();
 };
 
-// ---------- OVERRIDE handleRegister UNTUK INISIALISASI DATA USER BARU ----------
-var _originalHandleRegisterV2 = window.handleRegister;
-var _userCountBeforeRegisterV2 = 0;
+var _originalHandleRegisterV3 = window.handleRegister;
+var _userCountBeforeRegisterV3 = 0;
 window.handleRegister = function() {
-  _userCountBeforeRegisterV2 = getAllUsers().length;
-  _originalHandleRegisterV2();
+  _userCountBeforeRegisterV3 = getAllUsers().length;
+  _originalHandleRegisterV3();
   setTimeout(function() {
     var users = getAllUsers();
-    if (users.length > _userCountBeforeRegisterV2) {
+    if (users.length > _userCountBeforeRegisterV3) {
       var newUser = users[users.length - 1];
       var all = getAllApps();
-      if (!all[newUser.id]) {
-        all[newUser.id] = [];
-        saveAllApps(all);
-        sessionStorage.setItem('np_autosave_' + newUser.id, JSON.stringify([]));
-      }
+      if (!all[newUser.id]) { all[newUser.id] = []; saveAllApps(all); autoSaveData(); }
     }
   }, 500);
 };
 
-// ---------- OVERRIDE handleLogin UNTUK VALIDASI DATA SETELAH LOGIN ----------
-var _originalHandleLogin = window.handleLogin;
+var _originalHandleLoginV2 = window.handleLogin;
 window.handleLogin = function() {
-  // Panggil fungsi login asli
-  _originalHandleLogin();
-  // Setelah login, validasi data user
+  _originalHandleLoginV2();
   setTimeout(function() {
     var s = getSession();
     if (s) {
       validateAndLoadUserData();
-      if (!document.getElementById('applicationPage').classList.contains('hidden')) {
-        refreshAppUI();
-        updateStats();
-      }
+      if (!document.getElementById('applicationPage').classList.contains('hidden')) { refreshAppUI(); updateStats(); }
     }
   }, 300);
 };
 
-// ---------- SIMPAN DATA SEBELUM LOGOUT ----------
-var _originalHandleLogout = window.handleLogout;
-window.handleLogout = function() {
-  // Auto-save sebelum logout
-  autoSaveData();
-  _originalHandleLogout();
-};
+var _originalHandleLogoutV2 = window.handleLogout;
+window.handleLogout = function() { autoSaveData(); _originalHandleLogoutV2(); };
 
-// ---------- AUTO-SAVE SETIAP 30 DETIK SEBAGAI JARING PENGAMAN ----------
 setInterval(function() {
   var s = getSession();
-  if (s && !document.getElementById('applicationPage').classList.contains('hidden')) {
-    autoSaveData();
-  }
+  if (s && !document.getElementById('applicationPage').classList.contains('hidden')) { autoSaveData(); }
 }, 30000);
 
-// ---------- SIMPAN DATA SAAT HALAMAN DITUTUP / REFRESH ----------
-window.addEventListener('beforeunload', function() {
-  autoSaveData();
-});
+window.addEventListener('beforeunload', function() { autoSaveData(); });
+document.addEventListener('visibilitychange', function() { if (document.hidden) { autoSaveData(); } });
 
-// ---------- SIMPAN DATA SAAT APLIKASI DIHIDE (MOBILE) ----------
-document.addEventListener('visibilitychange', function() {
-  if (document.hidden) {
-    autoSaveData();
-  }
-});
-
-console.log('✅ Blok 9 R4 terpasang: Auto-save, sync sessionStorage, validasi login, perbaikan data hilang.');
-/* ================================================================
-   AKHIR TAMBAHAN BLOK 9 R4
-   ================================================================ */
+console.log('✅ Blok 9 R5 terpasang: Penyimpanan ganda, auto-save, backup upgrade.');
 </script>
 <!-- ============================================================
-     AKHIR BLOK 9 R4
+     AKHIR BLOK 9 R5
      ============================================================ -->
 
 <!-- ============================================================
