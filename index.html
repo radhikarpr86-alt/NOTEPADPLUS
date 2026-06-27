@@ -1551,43 +1551,29 @@ function refreshAppUI() {
 
   cont.innerHTML = apps.map(function(app) {
     var codes = app.codes || [];
-    // Urutkan kode di dalam aplikasi
-    codes.sort(function(c, d) {
-      var numC = parseInt(c.name.match(/^(\d+)/));
-      var numD = parseInt(d.name.match(/^(\d+)/));
-      if (numC && numD) return numC - numD;
-      if (numC) return -1;
-      if (numD) return 1;
-      return c.name.localeCompare(d.name);
-    });
+    // Urutkan aplikasi berdasarkan nomor di mana pun dalam nama
+apps.sort(function(a, b) {
+  var matchA = a.name.match(/(\d+)/); // cari angka di mana pun
+  var matchB = b.name.match(/(\d+)/);
+  var numA = matchA ? parseInt(matchA[1]) : NaN;
+  var numB = matchB ? parseInt(matchB[1]) : NaN;
+  if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+  if (!isNaN(numA)) return -1;
+  if (!isNaN(numB)) return 1;
+  return a.name.localeCompare(b.name);
+});
 
-    return '<div class="app-item">'+
-      '<div class="app-header" onclick="toggleAppCodes(\''+app.id+'\')">'+
-        '<div class="app-name">📁 '+escapeHTML(app.name)+' <span class="app-code-count">'+codes.length+' kode</span></div>'+
-        '<div style="display:flex;gap:4px;">'+
-          '<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showAddCodeModal(\''+app.id+'\')">+ Code</button>'+
-          '<button class="btn btn-warning btn-sm" onclick="event.stopPropagation(); editApp(\''+app.id+'\')">Edit</button>'+
-          '<button class="btn btn-success btn-sm" onclick="event.stopPropagation(); downloadAllCodes(\''+app.id+'\')">⬇ Download Semua</button>'+
-          '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteApp(\''+app.id+'\')">Hapus</button>'+
-        '</div>'+
-      '</div>'+
-      '<div class="app-codes-container" id="codes-'+app.id+'">'+
-        (codes.length===0?'<p style="color:var(--text-muted);padding:8px;">Belum ada kode.</p>':codes.map(function(code){
-          return '<div class="code-item">'+
-            '<div class="code-header">'+
-              '<span class="code-name">📄 '+escapeHTML(code.name)+'</span>'+
-              '<div style="display:flex;gap:4px;">'+
-                '<button class="btn btn-gray btn-sm" onclick="toggleCodePreview(\''+code.id+'\')">Preview</button>'+
-                '<button class="btn btn-warning btn-sm" onclick="editCode(\''+app.id+'\',\''+code.id+'\')">Edit</button>'+
-                '<button class="btn btn-danger btn-sm" onclick="deleteCode(\''+app.id+'\',\''+code.id+'\')">Hapus</button>'+
-              '</div>'+
-            '</div>'+
-            '<div class="code-content-preview" id="preview-'+code.id+'"><pre>'+escapeHTML(code.content)+'</pre></div>'+
-          '</div>';
-        }).join(''))+
-      '</div>'+
-    '</div>';
-  }).join('');
+// ... di dalam mapping app, untuk codes:
+codes.sort(function(c, d) {
+  var matchC = c.name.match(/(\d+)/);
+  var matchD = d.name.match(/(\d+)/);
+  var numC = matchC ? parseInt(matchC[1]) : NaN;
+  var numD = matchD ? parseInt(matchD[1]) : NaN;
+  if (!isNaN(numC) && !isNaN(numD)) return numC - numD;
+  if (!isNaN(numC)) return -1;
+  if (!isNaN(numD)) return 1;
+  return c.name.localeCompare(d.name);
+});
 }
 
 // ---------- SEARCH ----------
