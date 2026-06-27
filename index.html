@@ -630,7 +630,8 @@
 </div>
 
 <!-- ============================================================
-     BLOK 5 (R4) – MODAL PROFIL & SUPER ADMIN PANEL (FINAL)
+     BLOK 5 (R4) – MODAL PROFIL & SUPER ADMIN PANEL
+     (Dropdown pilih user untuk kode aktivasi)
      ============================================================ -->
 <!-- PROFILE MODAL -->
 <div class="modal-overlay" id="profileModal">
@@ -686,15 +687,20 @@
         <button class="admin-tab" onclick="switchAdminTab('security')" id="tabSecurity">Log Keamanan</button>
         <button class="admin-tab" onclick="switchAdminTab('settings')" id="tabSettings">Pengaturan</button>
         <button class="admin-tab" onclick="switchAdminTab('iklan')" id="tabIklan">📢 Iklan</button>
+        <button class="admin-tab" onclick="switchAdminTab('chat')" id="tabChat">💬 Chat User</button>
         <button class="admin-tab" onclick="switchAdminTab('backup')" id="tabBackup">💾 Backup</button>
       </div>
 
       <div class="admin-tab-content" id="adminTabCodes">
         <h4 style="margin-bottom:12px;">Buat Kode Aktivasi Baru</h4>
         <div class="form-group">
-          <input type="text" id="adminActivationUser" placeholder="Username atau email user">
+          <label class="form-label">Pilih User</label>
+          <select id="adminActivationUserSelect" style="width:100%;padding:10px;border-radius:var(--radius-sm);background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color-strong);">
+            <option value="">-- Pilih User --</option>
+          </select>
         </div>
         <div class="form-group">
+          <label class="form-label">Pilih Paket</label>
           <select id="adminActivationPackage">
             <option value="">-- Pilih Paket --</option>
           </select>
@@ -777,6 +783,27 @@
         <div id="adSaveResult" style="margin-top:12px;"></div>
       </div>
 
+      <div class="admin-tab-content hidden" id="adminTabChat">
+        <h4 style="margin-bottom:12px;">💬 Chat dengan User</h4>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:0.85rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Pilih User:</label>
+          <select id="adminChatUserSelect" onchange="setAdminChatTarget(this.value)" style="width:100%;padding:8px;border-radius:var(--radius-sm);background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color-strong);">
+            <option value="">-- Pilih User --</option>
+          </select>
+        </div>
+        <div class="chat-messages" id="adminChatMessages" style="height:250px;overflow-y:auto;background:var(--bg-tertiary);border-radius:var(--radius-sm);padding:8px;margin-bottom:12px;">
+          <p style="color:var(--text-secondary);text-align:center;padding:20px;">Pilih user untuk memulai chat.</p>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="text" id="adminChatInput" placeholder="Ketik balasan..." style="flex:1;">
+          <button onclick="sendAdminChat()" class="btn btn-primary btn-sm">Kirim</button>
+        </div>
+        <hr style="border-color:var(--border-color);margin:16px 0;">
+        <h4 style="margin-bottom:8px;">📢 Chat Massal ke Semua User</h4>
+        <textarea id="massChatMessage" rows="3" placeholder="Tulis pesan untuk semua user..." style="margin-bottom:8px;"></textarea>
+        <button onclick="sendMassChat()" class="btn btn-warning btn-block">Kirim ke Semua User</button>
+      </div>
+
       <div class="admin-tab-content hidden" id="adminTabBackup">
         <h4 style="margin-bottom:12px;">💾 Backup & Restore Data</h4>
         <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px;">
@@ -794,11 +821,14 @@
           <input type="file" accept=".html" onchange="restoreFromHTML(this)" hidden>
         </label>
         <hr style="border-color:var(--border-color);margin:16px 0;">
-        <button onclick="saveToGoogleDrive()" class="btn btn-primary btn-block" style="background:#4285F4;">
+        <button onclick="saveToGoogleDrive()" class="btn btn-primary btn-block" style="background:#4285F4;margin-bottom:12px;">
           ☁️ Simpan ke Google Drive / Memori
         </button>
+        <button onclick="emailBackup()" class="btn btn-primary btn-block" style="background:#DB4437;">
+          📧 Kirim Backup via Email
+        </button>
         <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;text-align:center;">
-          Backup data langsung ke Google Drive atau simpan di memori HP.
+          Backup akan didownload dan siap dilampirkan ke email Anda.
         </p>
       </div>
     </div>
@@ -1027,7 +1057,7 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <!-- ============================================================
-     BLOK 8 (R2) - JS CORE 1 (VERSI AMAN)
+     BLOK 8 (R3) – JS CORE 1 (REVISI 3 + LOG KEAMANAN)
      ============================================================ -->
 </body>
 <script>
@@ -1172,7 +1202,7 @@ function showRegisterModal() { openModal('registerModal'); }
 function showProfileModal() { openModal('profileModal'); loadProfileData(); }
 function showActivationModal() { if(!getSession()) return showLoginModal(); openModal('activationModal'); }
 
-// ---------- AUTH ----------
+// ---------- AUTH (DENGAN LOG KEAMANAN) ----------
 function handleLogin() {
   var u = document.getElementById('loginUsername');
   var p = document.getElementById('loginPassword');
@@ -1183,8 +1213,10 @@ function handleLogin() {
   err.classList.remove('show');
   if(!username||!password){ err.textContent='Isi semua field!'; err.classList.add('show'); return; }
 
+  // Super admin login
   if (username === SUPER_ADMIN_DATA.username && password === decodePassword(SUPER_ADMIN_DATA.password)) {
     saveSession(SUPER_ADMIN_DATA);
+    addSecurityLog('Super Admin login.');
     closeModal('loginModal'); showToast('Login Super Admin berhasil!','success');
     openApplication(); return;
   }
@@ -1199,6 +1231,7 @@ function handleLogin() {
   if (!user) { err.textContent='Username/password salah!'; err.classList.add('show'); return; }
   if (user.locked) { err.textContent='Akun terkunci! Hubungi admin.'; err.classList.add('show'); return; }
   saveSession(user);
+  addSecurityLog('User ' + user.username + ' login.');
   closeModal('loginModal'); showToast('Login berhasil!','success');
   openApplication();
 }
@@ -1225,6 +1258,10 @@ function handleRegister() {
 }
 
 function handleLogout() {
+  var s = getSession();
+  if (s) {
+    addSecurityLog('User ' + s.username + ' logout.');
+  }
   clearSession(); goToLandingPage(); updateHeaderUser(); showToast('Logout berhasil.','info');
 }
 
@@ -1261,7 +1298,8 @@ function activatePremium(code, errId, sucId) {
 </script>
 
 <!-- ============================================================
-     BLOK 9 (R2) - JS CORE 2 (VERSI AMAN)
+     BLOK 9 (R4) – JS CORE 2 (REVISI 4)
+     + Sembunyikan tombol Chat Admin & Chat User untuk Super Admin
      ============================================================ -->
 <script>
 // ---------- FORGOT PASSWORD ----------
@@ -1315,12 +1353,17 @@ function deleteAccount() {
   });
 }
 
-// ---------- HEADER UPDATE ----------
+// ---------- HEADER UPDATE (DITAMBAH SEMBUNYIKAN CHAT UNTUK SUPER ADMIN) ----------
 function updateHeaderUser() {
   var s = getSession();
   var badge = document.getElementById('userBadge'), prof = document.getElementById('profileButton');
   var adm = document.getElementById('adminButton'), logout = document.getElementById('logoutButton');
   var merge = document.getElementById('mergeButton'), act = document.getElementById('activationToolbarButton');
+
+  // Tombol chat
+  var chatAdminBtn = document.getElementById('chatButton');
+  var chatUserBtn = document.getElementById('chatUserButton');
+
   if(s){
     badge.style.display='flex'; document.getElementById('userAvatar').textContent=s.nama.charAt(0).toUpperCase();
     document.getElementById('userNameDisplay').textContent=s.nama;
@@ -1328,9 +1371,21 @@ function updateHeaderUser() {
     adm.classList.toggle('hidden', s.role!=='superadmin');
     merge.classList.toggle('hidden', !(s.premium||s.role==='superadmin'));
     act.style.display = (s.role=='user'&&!s.premium) ? 'inline-flex' : 'none';
+
+    // Sembunyikan tombol chat untuk super admin
+    if (s.role === 'superadmin') {
+      if (chatAdminBtn) chatAdminBtn.classList.add('hidden');
+      if (chatUserBtn) chatUserBtn.classList.add('hidden');
+    } else {
+      if (chatAdminBtn) chatAdminBtn.classList.remove('hidden');
+      if (chatUserBtn) chatUserBtn.classList.remove('hidden');
+    }
   }else{
     badge.style.display='none'; prof.classList.add('hidden'); adm.classList.add('hidden');
     logout.classList.add('hidden'); merge.classList.add('hidden'); act.style.display='none';
+    // Tampilkan kembali tombol chat jika tidak ada session (seharusnya tidak terjadi di halaman aplikasi)
+    if (chatAdminBtn) chatAdminBtn.classList.remove('hidden');
+    if (chatUserBtn) chatUserBtn.classList.remove('hidden');
   }
 }
 
@@ -1431,7 +1486,51 @@ function escapeHTML(str) {
   return str.replace(/[&<>"']/g,function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
 }
 
-// ---------- RENDER APP LIST ----------
+// ---------- DOWNLOAD SEMUA CODE DALAM SATU APLIKASI ----------
+function downloadAllCodes(appId) {
+  var s = getSession(); if (!s) return;
+  var apps = getAllApps()[s.id] || [];
+  var app = null;
+  for (var i = 0; i < apps.length; i++) {
+    if (apps[i].id === appId) { app = apps[i]; break; }
+  }
+  if (!app || !app.codes || app.codes.length === 0) {
+    showToast('Tidak ada kode untuk didownload.', 'warning');
+    return;
+  }
+
+  var codes = app.codes;
+  // Urutkan kode berdasarkan nama
+  codes.sort(function(a, b) {
+    var numA = parseInt(a.name.match(/^(\d+)/));
+    var numB = parseInt(b.name.match(/^(\d+)/));
+    if (numA && numB) return numA - numB;
+    if (numA) return -1;
+    if (numB) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  // Download satu per satu dengan jeda
+  function downloadNext(index) {
+    if (index >= codes.length) {
+      showToast('✅ Semua kode berhasil didownload!', 'success');
+      return;
+    }
+    var code = codes[index];
+    var blob = new Blob([code.content], { type: 'text/html' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (code.name || 'code_' + (index + 1)) + '.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setTimeout(function() {
+      downloadNext(index + 1);
+    }, 500);
+  }
+  downloadNext(0);
+}
+
+// ---------- RENDER APP LIST (DENGAN SORTING OTOMATIS) ----------
 function refreshAppUI() {
   var s = getSession();
   var cont = document.getElementById('appListContainer');
@@ -1439,14 +1538,36 @@ function refreshAppUI() {
   var apps = s ? (getAllApps()[s.id] || []) : [];
   if (apps.length === 0) { cont.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
+
+  // Urutkan aplikasi berdasarkan nomor di awal nama
+  apps.sort(function(a, b) {
+    var numA = parseInt(a.name.match(/^(\d+)/));
+    var numB = parseInt(b.name.match(/^(\d+)/));
+    if (numA && numB) return numA - numB;
+    if (numA) return -1;
+    if (numB) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
   cont.innerHTML = apps.map(function(app) {
     var codes = app.codes || [];
+    // Urutkan kode di dalam aplikasi
+    codes.sort(function(c, d) {
+      var numC = parseInt(c.name.match(/^(\d+)/));
+      var numD = parseInt(d.name.match(/^(\d+)/));
+      if (numC && numD) return numC - numD;
+      if (numC) return -1;
+      if (numD) return 1;
+      return c.name.localeCompare(d.name);
+    });
+
     return '<div class="app-item">'+
       '<div class="app-header" onclick="toggleAppCodes(\''+app.id+'\')">'+
         '<div class="app-name">📁 '+escapeHTML(app.name)+' <span class="app-code-count">'+codes.length+' kode</span></div>'+
         '<div style="display:flex;gap:4px;">'+
           '<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showAddCodeModal(\''+app.id+'\')">+ Code</button>'+
           '<button class="btn btn-warning btn-sm" onclick="event.stopPropagation(); editApp(\''+app.id+'\')">Edit</button>'+
+          '<button class="btn btn-success btn-sm" onclick="event.stopPropagation(); downloadAllCodes(\''+app.id+'\')">⬇ Download Semua</button>'+
           '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteApp(\''+app.id+'\')">Hapus</button>'+
         '</div>'+
       '</div>'+
@@ -1553,7 +1674,9 @@ function checkAllExpiredActivations() {
 </script>
 
 <!-- ============================================================
-     BLOK 10 (R3) – JS ADMIN (LENGKAP + GOOGLE DRIVE)
+     BLOK 10 (R4) – JS ADMIN (REVISI 4)
+     + Dropdown pilih user untuk kode aktivasi
+     + renderAdminUserSelect()
      ============================================================ -->
 <script>
 // ---------- SUPER ADMIN PANEL ----------
@@ -1562,6 +1685,7 @@ function showSuperAdminPanel() {
   openModal('superAdminModal');
   var sel = document.getElementById('adminActivationPackage'); sel.innerHTML='<option value="">-- Pilih Paket --</option>';
   getPackages().forEach(function(p){ sel.innerHTML += '<option value="'+p.id+'">'+p.name+' - Rp '+p.price+' ('+p.label+')</option>'; });
+  renderAdminUserSelect(); // isi dropdown user
   switchAdminTab('codes');
   refreshAllAdminTabs();
 }
@@ -1574,24 +1698,39 @@ function switchAdminTab(tab) {
   if(tab==='users') renderAdminUserList();
   if(tab==='packages') renderPackageEditList();
   if(tab==='security') renderSecurityLogs();
+  if(tab==='chat') renderAdminChat();
   if(tab==='codes') renderActiveCodesList();
   if(tab==='backup') { /* konten sudah statis di HTML */ }
   if(tab==='iklan') loadAdSettings();
 }
 
+// ---------- DROPDOWN USER UNTUK KODE AKTIVASI ----------
+function renderAdminUserSelect() {
+  var select = document.getElementById('adminActivationUserSelect');
+  if (!select) return;
+  var users = getAllUsers();
+  var filtered = [];
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].role !== 'superadmin') filtered.push(users[i]);
+  }
+  select.innerHTML = '<option value="">-- Pilih User --</option>';
+  for (var i = 0; i < filtered.length; i++) {
+    var u = filtered[i];
+    select.innerHTML += '<option value="' + u.username + '">' + u.nama + ' (' + u.username + ')</option>';
+  }
+}
+
+// ---------- KODE AKTIVASI ----------
 function adminCreateActivationCode() {
-  var userField = document.getElementById('adminActivationUser').value.trim();
+  var userField = document.getElementById('adminActivationUserSelect').value;
   var pkgId = document.getElementById('adminActivationPackage').value;
   var res = document.getElementById('adminCodeResult'); res.innerHTML='';
-  if(!userField||!pkgId){ res.innerHTML='<p class="form-error show">Isi user dan pilih paket!</p>'; return; }
-  var users = getAllUsers();
-  var target = users.find(function(u){return u.username===userField||u.email===userField;});
-  if(!target){ res.innerHTML='<p class="form-error show">User tidak ditemukan!</p>'; return; }
+  if(!userField||!pkgId){ res.innerHTML='<p class="form-error show">Pilih user dan paket!</p>'; return; }
   var code = 'NP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,5).toUpperCase();
   var valid = getValidCodes();
   valid[code] = { packageId: pkgId, used: false, createdBy: 'superadmin', createdAt: new Date().toISOString() };
   saveValidCodes(valid);
-  res.innerHTML = '<p class="form-success show">Kode aktivasi berhasil dibuat: <strong>'+code+'</strong></p>';
+  res.innerHTML = '<p class="form-success show">✅ Kode: <strong>'+code+'</strong></p>';
   renderActiveCodesList();
 }
 
@@ -1715,7 +1854,6 @@ function resetAllApplicationData() {
   });
 }
 
-// ========== RESTART APLIKASI ==========
 function restartApplication() {
   if (confirm('🔄 Restart aplikasi? Halaman akan dimuat ulang.')) { location.reload(); }
 }
@@ -1774,43 +1912,83 @@ function restoreFromHTML(input) {
   reader.readAsText(file);
 }
 
-// ========== SIMPAN KE GOOGLE DRIVE / MEMORI ==========
 function saveToGoogleDrive() {
   var allData = {};
-  for (var i = 0; i < localStorage.length; i++) {
-    var key = localStorage.key(i);
-    allData[key] = localStorage.getItem(key);
-  }
+  for (var i = 0; i < localStorage.length; i++) { var key = localStorage.key(i); allData[key] = localStorage.getItem(key); }
   var jsonStr = JSON.stringify(allData, null, 2);
   var blob = new Blob([jsonStr], { type: 'application/json' });
   var file = new File([blob], 'notepad_backup_' + new Date().toISOString().slice(0,10) + '.json', { type: 'application/json' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    navigator.share({
-      title: 'Backup Notepad+',
-      text: 'Simpan file backup Notepad+ ke Google Drive atau memori.',
-      files: [file]
-    }).then(function() {
-      showToast('✅ File berhasil dibagikan! Pilih Google Drive untuk menyimpan.', 'success');
-    }).catch(function(err) {
-      downloadBackupFile(blob);
-    });
-  } else {
-    downloadBackupFile(blob);
-  }
+    navigator.share({ title: 'Backup Notepad+', text: 'Simpan file backup Notepad+ ke Google Drive atau memori.', files: [file] })
+      .then(function() { showToast('✅ File berhasil dibagikan! Pilih Google Drive untuk menyimpan.', 'success'); })
+      .catch(function(err) { downloadBackupFile(blob); });
+  } else { downloadBackupFile(blob); }
 }
 function downloadBackupFile(blob) {
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'notepad_backup_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'notepad_backup_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
   showToast('⬇ File backup didownload. Simpan ke Google Drive secara manual.', 'success');
+}
+function emailBackup() {
+  var allData = {};
+  for (var i = 0; i < localStorage.length; i++) { var key = localStorage.key(i); allData[key] = localStorage.getItem(key); }
+  var jsonStr = JSON.stringify(allData, null, 2);
+  var blob = new Blob([jsonStr], { type: 'application/json' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'notepad_backup_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
+  showToast('📧 File backup telah didownload. Silakan lampirkan ke email Anda.', 'success');
+}
+
+// ========== CHAT ADMIN ==========
+function renderAdminChat() {
+  var allMessages = getChatMessages(); var userList = [];
+  for (var i = 0; i < allMessages.length; i++) { var m = allMessages[i]; var other = (m.from==='admin')?m.to:m.from; if (other!=='admin'&&other!=='all'&&userList.indexOf(other)===-1) userList.push(other); }
+  var select = document.getElementById('adminChatUserSelect');
+  if (select) { select.innerHTML = '<option value="">-- Pilih User --</option>'; var users = getAllUsers(); for (var i = 0; i < users.length; i++) { if (userList.indexOf(users[i].username)!==-1&&users[i].role!=='superadmin') { select.innerHTML += '<option value="'+users[i].username+'">'+users[i].nama+' ('+users[i].username+')</option>'; } } }
+  document.getElementById('adminChatMessages').innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:20px;">Pilih user untuk melihat chat.</p>';
+}
+function setAdminChatTarget(username) { if (!username) return; loadAdminChat(username); }
+function loadAdminChat(username) {
+  var allMessages = getChatMessages(); var filtered = [];
+  for (var i = 0; i < allMessages.length; i++) { var m = allMessages[i]; if ((m.from==='admin'&&m.to===username)||(m.from===username&&m.to==='admin')) filtered.push(m); }
+  var container = document.getElementById('adminChatMessages'); if (!container) return;
+  if (filtered.length===0) { container.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:20px;">Belum ada chat dengan '+username+'.</p>'; return; }
+  filtered.sort(function(a,b){ return new Date(a.time)-new Date(b.time); });
+  var html = ''; for (var i = 0; i < filtered.length; i++) { var m = filtered[i]; var isAdmin = (m.from==='admin'); var cls = isAdmin?'chat-msg admin':'chat-msg user'; var sender = isAdmin?'Admin':m.from; html += '<div class="'+cls+'"><div class="chat-sender">'+sender+'</div>'+m.text+'<div class="chat-time">'+new Date(m.time).toLocaleString()+'</div></div>'; }
+  container.innerHTML = html; container.scrollTop = container.scrollHeight;
+}
+function sendAdminChat() {
+  var select = document.getElementById('adminChatUserSelect'); var target = select?select.value:''; if (!target) { showToast('Pilih user!','error'); return; }
+  var input = document.getElementById('adminChatInput'); var text = input.value.trim(); if (!text) return;
+  var msgs = getChatMessages(); msgs.push({ from:'admin', to:target, text:text, time:new Date().toISOString() }); saveChatMessages(msgs); input.value=''; loadAdminChat(target);
+  showToast('Balasan terkirim ke '+target, 'success');
+}
+function sendMassChat() {
+  var textarea = document.getElementById('massChatMessage'); var text = textarea.value.trim(); if (!text) { showToast('Tulis pesan!','error'); return; }
+  var users = getAllUsers(); var msgs = getChatMessages(); var count = 0;
+  for (var i = 0; i < users.length; i++) { if (users[i].role!=='superadmin') { msgs.push({ from:'admin', to:users[i].username, text:text, time:new Date().toISOString() }); count++; } }
+  msgs.push({ from:'admin', to:'all', text:text, time:new Date().toISOString() }); saveChatMessages(msgs); textarea.value = '';
+  showToast('Pesan massal terkirim ke '+count+' user!', 'success');
 }
 </script>
 
 <!-- ============================================================
-     BLOK 11 - JS CHAT, LANDING DISPLAY, OFFLINE, INIT (REVISI)
+     BLOK 11 (R2) – JS CHAT, LANDING DISPLAY, OFFLINE, INIT (REVISI)
      ============================================================ -->
 <script>
+// ---------- HUBUNGI ADMIN (LANDING PAGE) ----------
+function hubungiAdminLanding() {
+  var session = getSession();
+  if (session) {
+    // Jika sudah login, langsung buka chat admin
+    showChatModal();
+  } else {
+    // Jika belum login, arahkan ke daftar dulu
+    showToast('Silakan Daftar terlebih dahulu untuk menghubungi Admin.', 'warning');
+    showRegisterModal();
+  }
+}
+
 // ---------- CHAT SYSTEM ----------
 function showChatModal() {
   var s = getSession(); if(!s) return showToast('Login dulu!','error');
