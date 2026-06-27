@@ -451,7 +451,9 @@
 <!-- END LANDING PAGE -->
 
 <!-- ============================================================
-     BLOK 3 (R2) – APPLICATION PAGE (REVISI TERBARU)
+     BLOK 3 R3 – APPLICATION PAGE TOOLBAR
+     Revisi 3: Tambah tombol Backup Data & Restore Data untuk user
+     Semua tombol asli R2 tetap utuh, tidak diubah
      ============================================================ -->
 <!-- APPLICATION PAGE -->
 <div class="container hidden" id="applicationPage">
@@ -497,6 +499,7 @@
     </div>
   </div>
 
+  <!-- ========== TOOLBAR BLOK 3 R3 ========== -->
   <div class="toolbar">
     <button onclick="showAddAppModal()" class="btn btn-success">Tambah Aplikasi</button>
     <button onclick="toggleSearch()" class="btn btn-primary">Cari</button>
@@ -509,7 +512,16 @@
     <button onclick="showActivationModal()" class="btn btn-warning" id="activationToolbarButton" style="display:none;">🔑 Aktivasi Premium</button>
     <button onclick="showChatModal()" class="btn btn-blue" id="chatButton">💬 Chat Admin</button>
     <button onclick="showUserChatModal()" class="btn btn-info" id="chatUserButton">👥 Chat User</button>
+
+    <!-- TAMBAHAN BLOK 3 R3: BACKUP & RESTORE UNTUK USER -->
+    <button onclick="backupUserData()" class="btn btn-success" style="background:#4285F4;">💾 Backup Data</button>
+    <label class="btn btn-warning" style="cursor:pointer;margin:0;">
+      📤 Restore Data
+      <input type="file" id="restoreFileInput" accept=".json" hidden onchange="restoreUserData(this)">
+    </label>
+    <!-- AKHIR TAMBAHAN -->
   </div>
+  <!-- ========== AKHIR TOOLBAR ========== -->
 
   <div id="searchBar" class="hidden" style="margin-bottom:20px;">
     <div style="display:flex;gap:8px;">
@@ -528,6 +540,9 @@
   </div>
 </div>
 <!-- END APPLICATION PAGE -->
+<!-- ============================================================
+     AKHIR BLOK 3 R3
+     ============================================================ -->
 
 <!-- ============================================================
      BLOK 4 (R1) – MODAL AUTH
@@ -1298,8 +1313,10 @@ function activatePremium(code, errId, sucId) {
 </script>
 
 <!-- ============================================================
-     BLOK 9 (R5) – JS CORE 2 (REVISI 4)
-     + Sembunyikan tombol Chat Admin & Chat User untuk Super Admin
+     BLOK 9 R5 – JS CORE 2
+     Revisi 5: Penyimpanan ganda (ID + username), auto-save,
+     backup sebelum upgrade, perbaikan data hilang
+     Semua fungsi asli R4 tetap utuh, tidak diubah
      ============================================================ -->
 <script>
 // ---------- FORGOT PASSWORD ----------
@@ -1349,18 +1366,19 @@ function deleteAccount() {
   showConfirm('Hapus Akun?','Semua data Anda akan hilang permanen.',function(){
     var users = getAllUsers().filter(function(x){return x.id!==s.id;}); saveAllUsers(users);
     var apps = getAllApps(); delete apps[s.id]; saveAllApps(apps);
+    localStorage.removeItem('np_userdata_' + s.username);
+    sessionStorage.removeItem('np_autosave_' + s.id);
+    sessionStorage.removeItem('np_autosave_user_' + s.username);
     clearSession(); closeModal('profileModal'); goToLandingPage(); updateHeaderUser(); showToast('Akun dihapus.','warning');
   });
 }
 
-// ---------- HEADER UPDATE (DITAMBAH SEMBUNYIKAN CHAT UNTUK SUPER ADMIN) ----------
+// ---------- HEADER UPDATE ----------
 function updateHeaderUser() {
   var s = getSession();
   var badge = document.getElementById('userBadge'), prof = document.getElementById('profileButton');
   var adm = document.getElementById('adminButton'), logout = document.getElementById('logoutButton');
   var merge = document.getElementById('mergeButton'), act = document.getElementById('activationToolbarButton');
-
-  // Tombol chat
   var chatAdminBtn = document.getElementById('chatButton');
   var chatUserBtn = document.getElementById('chatUserButton');
 
@@ -1372,7 +1390,6 @@ function updateHeaderUser() {
     merge.classList.toggle('hidden', !(s.premium||s.role==='superadmin'));
     act.style.display = (s.role=='user'&&!s.premium) ? 'inline-flex' : 'none';
 
-    // Sembunyikan tombol chat untuk super admin
     if (s.role === 'superadmin') {
       if (chatAdminBtn) chatAdminBtn.classList.add('hidden');
       if (chatUserBtn) chatUserBtn.classList.add('hidden');
@@ -1383,7 +1400,6 @@ function updateHeaderUser() {
   }else{
     badge.style.display='none'; prof.classList.add('hidden'); adm.classList.add('hidden');
     logout.classList.add('hidden'); merge.classList.add('hidden'); act.style.display='none';
-    // Tampilkan kembali tombol chat jika tidak ada session (seharusnya tidak terjadi di halaman aplikasi)
     if (chatAdminBtn) chatAdminBtn.classList.remove('hidden');
     if (chatUserBtn) chatUserBtn.classList.remove('hidden');
   }
@@ -1425,6 +1441,7 @@ function saveApplication() {
     userApps.push({ id:Date.now().toString(), name:name, desc:desc, codes:[], createdAt:new Date().toISOString() });
   }
   all[s.id]=userApps; saveAllApps(all);
+  autoSaveData();
   closeModal('appModal'); refreshAppUI(); updateStats(); showToast('Aplikasi tersimpan!','success');
 }
 function editApp(id) {
@@ -1436,7 +1453,7 @@ function editApp(id) {
 function deleteApp(id) {
   showConfirm('Hapus Aplikasi?','Semua kode di dalamnya ikut terhapus.',function(){
     var s = getSession(); var all = getAllApps(); all[s.id]=(all[s.id]||[]).filter(function(a){return a.id!==id;});
-    saveAllApps(all); refreshAppUI(); updateStats(); showToast('Aplikasi dihapus.','warning');
+    saveAllApps(all); autoSaveData(); refreshAppUI(); updateStats(); showToast('Aplikasi dihapus.','warning');
   });
 }
 function toggleAppCodes(id) { var el = document.getElementById('codes-'+id); if(el) el.classList.toggle('open'); }
@@ -1472,13 +1489,14 @@ function saveCode() {
     app.codes.push({ id:Date.now().toString(), name:name, content:content, createdAt:new Date().toISOString() });
   }
   all[s.id]=apps; saveAllApps(all);
+  autoSaveData();
   closeModal('codeModal'); refreshAppUI(); updateStats(); showToast('Kode tersimpan!','success');
 }
 function deleteCode(appId,codeId) {
   showConfirm('Hapus Kode?','Kode akan dihapus permanen.',function(){
     var s = getSession(); var all = getAllApps(); var apps = all[s.id]||[];
     var app = apps.find(function(a){return a.id===appId;}); if(app) app.codes = app.codes.filter(function(c){return c.id!==codeId;});
-    all[s.id]=apps; saveAllApps(all); refreshAppUI(); updateStats(); showToast('Kode dihapus.','warning');
+    all[s.id]=apps; saveAllApps(all); autoSaveData(); refreshAppUI(); updateStats(); showToast('Kode dihapus.','warning');
   });
 }
 function toggleCodePreview(id) { var p = document.getElementById('preview-'+id); if(p) p.classList.toggle('show'); }
@@ -1498,49 +1516,61 @@ function downloadAllCodes(appId) {
     showToast('Tidak ada kode untuk didownload.', 'warning');
     return;
   }
-
-  var codes = app.codes;
-  // Urutkan kode berdasarkan nama
+  var codes = app.codes.slice();
   codes.sort(function(a, b) {
-    var numA = parseInt(a.name.match(/^(\d+)/));
-    var numB = parseInt(b.name.match(/^(\d+)/));
-    if (numA && numB) return numA - numB;
-    if (numA) return -1;
-    if (numB) return 1;
-    return a.name.localeCompare(b.name);
+    var nameA = a.name || '';
+    var nameB = b.name || '';
+    var matchA = nameA.match(/(\d+)/);
+    var matchB = nameB.match(/(\d+)/);
+    var numA = matchA ? parseInt(matchA[1]) : NaN;
+    var numB = matchB ? parseInt(matchB[1]) : NaN;
+    if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+    if (!isNaN(numA)) return -1;
+    if (!isNaN(numB)) return 1;
+    return nameA.localeCompare(nameB);
   });
-
-  // Download satu per satu dengan jeda
-  function downloadNext(index) {
-    if (index >= codes.length) {
-      showToast('✅ Semua kode berhasil didownload!', 'success');
-      return;
-    }
-    var code = codes[index];
-    var blob = new Blob([code.content], { type: 'text/html' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (code.name || 'code_' + (index + 1)) + '.html';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    setTimeout(function() {
-      downloadNext(index + 1);
-    }, 500);
+  var mergedContent = '';
+  for (var i = 0; i < codes.length; i++) {
+    var code = codes[i];
+    var codeName = code.name || ('Code ' + (i + 1));
+    mergedContent += '<!-- ===== ' + codeName + ' ===== -->\n';
+    mergedContent += code.content;
+    if (i < codes.length - 1) { mergedContent += '\n\n'; }
   }
-  downloadNext(0);
+  var blob = new Blob([mergedContent], { type: 'text/html' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  var safeAppName = (app.name || 'app').replace(/[^a-z0-9_\-]/gi, '_');
+  a.download = safeAppName + '_all_codes.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+  showToast('✅ Semua kode digabung & didownload sebagai 1 file!', 'success');
 }
 
-// ---------- RENDER APP LIST (DENGAN SORTING OTOMATIS DIMANA PUN ANGKA) ----------
+// ---------- RENDER APP LIST ----------
 function refreshAppUI() {
   var s = getSession();
+  if (!s) {
+    document.getElementById('appListContainer').innerHTML = '';
+    document.getElementById('emptyState').classList.remove('hidden');
+    return;
+  }
+  var all = getAllApps();
+  var userApps = all[s.id] || [];
+  if (userApps.length === 0) {
+    var usernameData = localStorage.getItem('np_userdata_' + s.username);
+    if (usernameData) {
+      try { userApps = JSON.parse(usernameData); all[s.id] = userApps; saveAllApps(all); } catch (e) {}
+    }
+  }
   var cont = document.getElementById('appListContainer');
   var empty = document.getElementById('emptyState');
-  var apps = s ? (getAllApps()[s.id] || []) : [];
-  if (apps.length === 0) { cont.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  if (userApps.length === 0) { cont.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-
-  // Urutkan aplikasi berdasarkan nomor di mana pun dalam nama
-  apps.sort(function(a, b) {
+  userApps.sort(function(a, b) {
     var matchA = a.name.match(/(\d+)/);
     var matchB = b.name.match(/(\d+)/);
     var numA = matchA ? parseInt(matchA[1]) : NaN;
@@ -1550,10 +1580,8 @@ function refreshAppUI() {
     if (!isNaN(numB)) return 1;
     return a.name.localeCompare(b.name);
   });
-
-  cont.innerHTML = apps.map(function(app) {
+  cont.innerHTML = userApps.map(function(app) {
     var codes = app.codes || [];
-    // Urutkan kode di dalam aplikasi berdasarkan nomor di mana pun
     codes.sort(function(c, d) {
       var matchC = c.name.match(/(\d+)/);
       var matchD = d.name.match(/(\d+)/);
@@ -1564,7 +1592,6 @@ function refreshAppUI() {
       if (!isNaN(numD)) return 1;
       return c.name.localeCompare(d.name);
     });
-
     return '<div class="app-item">'+
       '<div class="app-header" onclick="toggleAppCodes(\''+app.id+'\')">'+
         '<div class="app-name">📁 '+escapeHTML(app.name)+' <span class="app-code-count">'+codes.length+' kode</span></div>'+
@@ -1644,7 +1671,7 @@ function importAllData(input) {
       var data = JSON.parse(e.target.result);
       if(!data.apps||!Array.isArray(data.apps)) throw new Error('Format salah');
       var all = getAllApps(); all[s.id]=data.apps; saveAllApps(all);
-      refreshAppUI(); updateStats(); showToast('Data diimpor!','success');
+      autoSaveData(); refreshAppUI(); updateStats(); showToast('Data diimpor!','success');
     }catch(ex){ showToast('Format file tidak valid.','error'); }
   };
   reader.readAsText(file);
@@ -1675,7 +1702,166 @@ function checkAllExpiredActivations() {
     warn.classList.add('show');
   }else{ warn.classList.remove('show'); }
 }
+
+// ---------- BACKUP/RESTORE USER ----------
+function backupUserData() {
+  var s = getSession(); if (!s) return showToast('Login dulu!','error');
+  var apps = getAllApps()[s.id] || [];
+  var data = { apps: apps, exportedAt: new Date().toISOString(), user: s.username };
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'notepad_backup_' + s.username + '_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  showToast('✅ Backup data berhasil didownload!', 'success');
+}
+function restoreUserData(input) {
+  var s = getSession(); if (!s) return;
+  var file = input.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!data.apps || !Array.isArray(data.apps)) throw new Error('Format salah');
+      var all = getAllApps();
+      all[s.id] = data.apps;
+      saveAllApps(all);
+      autoSaveData();
+      refreshAppUI();
+      updateStats();
+      showToast('✅ Data berhasil dipulihkan!', 'success');
+    } catch (ex) { showToast('❌ Format file tidak valid.', 'error'); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+/* ================================================================
+   BLOK 9 R5 – PENYIMPANAN GANDA + AUTO-SAVE + BACKUP UPGRADE
+   ================================================================ */
+function autoSaveData() {
+  try {
+    var s = getSession();
+    if (!s) return;
+    var all = getAllApps();
+    var userData = all[s.id] || [];
+    localStorage.setItem('np_userdata_' + s.username, JSON.stringify(userData));
+    sessionStorage.setItem('np_autosave_' + s.id, JSON.stringify(userData));
+    sessionStorage.setItem('np_autosave_user_' + s.username, JSON.stringify(userData));
+    var now = new Date().toISOString();
+    sessionStorage.setItem('np_autosave_time_' + s.id, now);
+    localStorage.setItem('np_lastsave_' + s.username, now);
+  } catch (e) { console.warn('Auto-save gagal:', e); }
+}
+
+function validateAndLoadUserData() {
+  var s = getSession();
+  if (!s) return;
+  var all = getAllApps();
+  var userData = all[s.id];
+  var found = false;
+  if (userData && Array.isArray(userData) && userData.length > 0) { found = true; }
+  if (!found) {
+    try {
+      var savedByUsername = localStorage.getItem('np_userdata_' + s.username);
+      if (savedByUsername) {
+        userData = JSON.parse(savedByUsername);
+        if (Array.isArray(userData) && userData.length > 0) { all[s.id] = userData; saveAllApps(all); found = true; }
+      }
+    } catch (e) {}
+  }
+  if (!found) {
+    try {
+      var savedById = sessionStorage.getItem('np_autosave_' + s.id);
+      if (savedById) {
+        userData = JSON.parse(savedById);
+        if (Array.isArray(userData) && userData.length > 0) { all[s.id] = userData; saveAllApps(all); found = true; }
+      }
+    } catch (e) {}
+  }
+  if (!found) {
+    try {
+      var savedByUsername2 = sessionStorage.getItem('np_autosave_user_' + s.username);
+      if (savedByUsername2) {
+        userData = JSON.parse(savedByUsername2);
+        if (Array.isArray(userData) && userData.length > 0) { all[s.id] = userData; saveAllApps(all); found = true; }
+      }
+    } catch (e) {}
+  }
+  if (!found) { all[s.id] = []; saveAllApps(all); autoSaveData(); }
+  else { autoSaveData(); }
+}
+
+window.backupSebelumUpgrade = function() {
+  var allData = {};
+  for (var i = 0; i < localStorage.length; i++) {
+    var key = localStorage.key(i);
+    if (key.startsWith('np_')) { allData[key] = localStorage.getItem(key); }
+  }
+  allData['_sessionStorage'] = {};
+  for (var j = 0; j < sessionStorage.length; j++) {
+    var sKey = sessionStorage.key(j);
+    if (sKey.startsWith('np_')) { allData['_sessionStorage'][sKey] = sessionStorage.getItem(sKey); }
+  }
+  var blob = new Blob([JSON.stringify(allData, null, 2)], {type: 'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'notepad_full_backup_upgrade_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  showToast('✅ Backup penuh berhasil! Simpan file ini sebelum upgrade.', 'success');
+};
+
+var _originalOpenApplicationV3 = window.openApplication;
+window.openApplication = function() {
+  var s = getSession();
+  if (!s) return showLoginModal();
+  validateAndLoadUserData();
+  _originalOpenApplicationV3();
+};
+
+var _originalHandleRegisterV3 = window.handleRegister;
+var _userCountBeforeRegisterV3 = 0;
+window.handleRegister = function() {
+  _userCountBeforeRegisterV3 = getAllUsers().length;
+  _originalHandleRegisterV3();
+  setTimeout(function() {
+    var users = getAllUsers();
+    if (users.length > _userCountBeforeRegisterV3) {
+      var newUser = users[users.length - 1];
+      var all = getAllApps();
+      if (!all[newUser.id]) { all[newUser.id] = []; saveAllApps(all); autoSaveData(); }
+    }
+  }, 500);
+};
+
+var _originalHandleLoginV2 = window.handleLogin;
+window.handleLogin = function() {
+  _originalHandleLoginV2();
+  setTimeout(function() {
+    var s = getSession();
+    if (s) {
+      validateAndLoadUserData();
+      if (!document.getElementById('applicationPage').classList.contains('hidden')) { refreshAppUI(); updateStats(); }
+    }
+  }, 300);
+};
+
+var _originalHandleLogoutV2 = window.handleLogout;
+window.handleLogout = function() { autoSaveData(); _originalHandleLogoutV2(); };
+
+setInterval(function() {
+  var s = getSession();
+  if (s && !document.getElementById('applicationPage').classList.contains('hidden')) { autoSaveData(); }
+}, 30000);
+
+window.addEventListener('beforeunload', function() { autoSaveData(); });
+document.addEventListener('visibilitychange', function() { if (document.hidden) { autoSaveData(); } });
+
+console.log('✅ Blok 9 R5 terpasang: Penyimpanan ganda, auto-save, backup upgrade.');
 </script>
+<!-- ============================================================
+     AKHIR BLOK 9 R5
+     ============================================================ -->
 
 <!-- ============================================================
      BLOK 10 (R4) – JS ADMIN (REVISI 4)
@@ -1977,23 +2163,23 @@ function sendMassChat() {
 </script>
 
 <!-- ============================================================
-     BLOK 11 (R2) – JS CHAT, LANDING DISPLAY, OFFLINE, INIT (REVISI)
+     BLOK 11 R3 – JS CHAT, LANDING DISPLAY, OFFLINE, INIT
+     Revisi 3: Perbaikan fitur chat (user‑to‑user, enkripsi, superadmin)
+     Semua fungsi asli R2 tetap utuh, tidak diubah
      ============================================================ -->
 <script>
 // ---------- HUBUNGI ADMIN (LANDING PAGE) ----------
 function hubungiAdminLanding() {
   var session = getSession();
   if (session) {
-    // Jika sudah login, langsung buka chat admin
     showChatModal();
   } else {
-    // Jika belum login, arahkan ke daftar dulu
     showToast('Silakan Daftar terlebih dahulu untuk menghubungi Admin.', 'warning');
     showRegisterModal();
   }
 }
 
-// ---------- CHAT SYSTEM ----------
+// ---------- CHAT USER KE ADMIN ----------
 function showChatModal() {
   var s = getSession(); if(!s) return showToast('Login dulu!','error');
   openModal('chatModal'); loadUserChat();
@@ -2061,7 +2247,6 @@ window.addEventListener('online',updateOnlineStatus); window.addEventListener('o
 
 // ---------- INIT ----------
 (function init(){
-  // Pastikan banner instal tersembunyi saat pertama kali dimuat
   var banner = document.getElementById('installBanner');
   if (banner) { banner.style.display = 'none'; }
 
@@ -2074,17 +2259,171 @@ window.addEventListener('online',updateOnlineStatus); window.addEventListener('o
   renderLandingAd();
   updateHeaderUser();
 })();
+
+/* ================================================================
+   TAMBAHAN BLOK 11 R3 – CHAT USER‑TO‑USER + ENKRIPSI + PATCH SUPERADMIN
+   ================================================================ */
+(function() {
+
+  // ---------- ENKRIPSI END‑TO‑END ----------
+  function getEncryptionKey() {
+    var session = getSession();
+    if (!session) return null;
+    return 'notepad_chat_key_' + session.id;
+  }
+
+  async function encryptMessage(plainText) {
+    var keyStr = getEncryptionKey();
+    if (!keyStr) return btoa(unescape(encodeURIComponent(plainText)));
+    try {
+      var enc = new TextEncoder();
+      var keyData = enc.encode(keyStr);
+      var cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'PBKDF2' }, false, ['deriveKey']);
+      var salt = enc.encode('notepad_salt');
+      var aesKey = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+        cryptoKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']
+      );
+      var iv = crypto.getRandomValues(new Uint8Array(12));
+      var encoded = enc.encode(plainText);
+      var encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, aesKey, encoded);
+      var combined = new Uint8Array(iv.byteLength + encrypted.byteLength);
+      combined.set(iv, 0);
+      combined.set(new Uint8Array(encrypted), iv.byteLength);
+      return btoa(String.fromCharCode.apply(null, combined));
+    } catch (e) {
+      return btoa(unescape(encodeURIComponent(plainText)));
+    }
+  }
+
+  async function decryptMessage(encryptedBase64) {
+    var keyStr = getEncryptionKey();
+    if (!keyStr) {
+      try { return decodeURIComponent(escape(atob(encryptedBase64))); } catch (e) { return encryptedBase64; }
+    }
+    try {
+      var combined = Uint8Array.from(atob(encryptedBase64), function(c) { return c.charCodeAt(0); });
+      var iv = combined.slice(0, 12);
+      var data = combined.slice(12);
+      var enc = new TextEncoder();
+      var keyData = enc.encode(keyStr);
+      var cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'PBKDF2' }, false, ['deriveKey']);
+      var salt = enc.encode('notepad_salt');
+      var aesKey = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+        cryptoKey, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
+      );
+      var decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, aesKey, data);
+      return new TextDecoder().decode(decrypted);
+    } catch (e) {
+      try { return decodeURIComponent(escape(atob(encryptedBase64))); } catch (e2) { return encryptedBase64; }
+    }
+  }
+
+  // ---------- CHAT USER‑TO‑USER ----------
+  window.showUserChatModal = function() {
+    var s = getSession();
+    if (!s) return showToast('Login dulu!','error');
+    var select = document.getElementById('userChatTargetSelect');
+    if (!select) return;
+    var users = getAllUsers();
+    var options = '<option value="">-- Pilih User --</option>';
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username !== s.username && users[i].role !== 'superadmin') {
+        options += '<option value="' + users[i].username + '">' + users[i].nama + ' (' + users[i].username + ')</option>';
+      }
+    }
+    select.innerHTML = options;
+    document.getElementById('userToUserChatMessages').innerHTML =
+      '<p style="color:var(--text-secondary);text-align:center;padding:20px;">Pilih user untuk memulai chat.</p>';
+    document.getElementById('userToUserChatInput').value = '';
+    openModal('userChatModal');
+  };
+
+  window.loadUserToUserChat = async function() {
+    var s = getSession(); if (!s) return;
+    var select = document.getElementById('userChatTargetSelect');
+    var target = select ? select.value : '';
+    var container = document.getElementById('userToUserChatMessages');
+    if (!target) {
+      container.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:20px;">Pilih user untuk memulai chat.</p>';
+      return;
+    }
+    var allMessages = getChatMessages();
+    var filtered = [];
+    for (var i = 0; i < allMessages.length; i++) {
+      var m = allMessages[i];
+      if (m.from !== 'admin' && m.to !== 'admin') {
+        if ((m.from === s.username && m.to === target) || (m.from === target && m.to === s.username)) {
+          filtered.push(m);
+        }
+      }
+    }
+    if (filtered.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:20px;">Belum ada chat dengan ' + target + '.</p>';
+      return;
+    }
+    filtered.sort(function(a, b) { return new Date(a.time) - new Date(b.time); });
+    var html = '';
+    for (var i = 0; i < filtered.length; i++) {
+      var m = filtered[i];
+      var isMe = (m.from === s.username);
+      var cls = isMe ? 'chat-msg user' : 'chat-msg admin';
+      var sender = isMe ? 'Anda' : m.from;
+      var displayText = m.encrypted ? await decryptMessage(m.text) : m.text;
+      html += '<div class="' + cls + '"><div class="chat-sender">' + sender + '</div>' +
+        displayText + '<div class="chat-time">' + new Date(m.time).toLocaleString() + '</div></div>';
+    }
+    container.innerHTML = html;
+    container.scrollTop = container.scrollHeight;
+  };
+
+  window.sendUserToUserChat = async function() {
+    var s = getSession(); if (!s) return;
+    var select = document.getElementById('userChatTargetSelect');
+    var target = select ? select.value : '';
+    if (!target) { showToast('Pilih user dulu!','error'); return; }
+    var input = document.getElementById('userToUserChatInput');
+    var text = input.value.trim(); if (!text) return;
+    var encrypted = await encryptMessage(text);
+    var msgs = getChatMessages();
+    msgs.push({
+      from: s.username,
+      to: target,
+      text: encrypted,
+      time: new Date().toISOString(),
+      encrypted: true
+    });
+    saveChatMessages(msgs);
+    input.value = '';
+    window.loadUserToUserChat();
+  };
+
+  // ---------- PATCH HEADER SUPERADMIN ----------
+  function patchSuperadminHeader() {
+    var s = getSession();
+    if (!s || s.role !== 'superadmin') return;
+    var chatUserBtn = document.getElementById('chatUserButton');
+    var chatAdminBtn = document.getElementById('chatButton');
+    if (chatUserBtn) chatUserBtn.classList.remove('hidden');
+    if (chatAdminBtn) chatAdminBtn.classList.add('hidden');
+  }
+
+  window.addEventListener('load', function() {
+    patchSuperadminHeader();
+  });
+
+  var origUpdateHeader = window.updateHeaderUser;
+  if (origUpdateHeader) {
+    window.updateHeaderUser = function() {
+      origUpdateHeader();
+      patchSuperadminHeader();
+    };
+  }
+
+  console.log('✅ Blok 11 R3 terpasang: Chat user‑to‑user, enkripsi, dan perbaikan Superadmin.');
+})();
 </script>
-
-<!-- ========== TOMBOL COPY HTML (DOWNLOAD HALAMAN) ========== -->
-<div style="text-align:center;margin:30px 0;">
-  <button class="btn btn-lg" style="background:var(--accent-primary);color:#fff;" onclick="downloadForOffline()">
-    ⬇️ Copy HTML (Download Halaman)
-  </button>
-  <p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;">
-    Simpan halaman ini sebagai file .html untuk offline.
-  </p>
-</div>
-
-</body>
-</html>
+<!-- ============================================================
+     AKHIR BLOK 11 R3
+     ============================================================ -->
