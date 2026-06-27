@@ -1,5 +1,5 @@
 <!-- ============================================================
-     BLOK 1 - PEMBUKA (HTML HEAD, CSS, HEADER, LANDING PAGE AWAL)
+     BLOK 1 R2 – PEMBUKA (LANDING PAGE, HUBUNGI ADMIN VIA CHAT)
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="id">
@@ -27,7 +27,6 @@
       font: inherit;
       vertical-align: baseline;
     }
-
     html {
       scroll-behavior: smooth;
       -webkit-text-size-adjust: 100%;
@@ -36,7 +35,6 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       background: var(--bg-primary);
@@ -46,7 +44,6 @@
       overflow-x: hidden;
       transition: background 0.3s ease, color 0.3s ease;
     }
-
     :root {
       --bg-primary: #0a0a1a;
       --bg-secondary: #12122a;
@@ -89,7 +86,6 @@
       --z-modal: 998;
       --z-toast: 9999;
     }
-
     body.light-theme {
       --bg-primary: #f5f5f8;
       --bg-secondary: #ffffff;
@@ -101,19 +97,16 @@
       --border-color: rgba(0, 0, 0, 0.08);
       --border-color-strong: rgba(0, 0, 0, 0.12);
     }
-
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: var(--radius-full); }
     * { scrollbar-width: thin; scrollbar-color: var(--accent-primary) transparent; }
-
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.2); } 50% { box-shadow: 0 0 40px rgba(124, 58, 237, 0.5); } }
-
     .hidden { display: none !important; }
     .flex { display: flex; }
     .flex-center { display: flex; align-items: center; justify-content: center; }
@@ -153,7 +146,6 @@
     .overflow-hidden { overflow: hidden; }
     .overflow-auto { overflow-y: auto; }
     .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-weight: 600;
@@ -184,7 +176,6 @@
     .btn-lg { padding: 14px 28px; font-size: 1.05rem; min-height: 48px; }
     .btn-xl { padding: 18px 36px; font-size: 1.15rem; min-height: 56px; }
     .btn-block { width: 100%; display: flex; }
-
     .badge {
       display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px;
       border-radius: var(--radius-full); font-size: 0.7rem; font-weight: 600;
@@ -194,7 +185,6 @@
     .badge-danger { background: var(--color-danger); color: #ffffff; }
     .badge-warning { background: var(--color-warning); color: #000000; }
     .badge-purple { background: var(--accent-primary); color: #ffffff; }
-
     input, textarea, select {
       width: 100%; padding: 10px 14px; border: 1px solid var(--border-color-strong);
       border-radius: var(--radius-sm); font-size: 0.9rem; transition: all var(--transition-base);
@@ -213,14 +203,12 @@
     .form-success.show { display: block; }
     .link-text { color: var(--accent-light); cursor: pointer; transition: color var(--transition-base); }
     .link-text:hover { color: var(--accent-primary); text-decoration: underline; }
-
     .toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: var(--z-toast); max-width: 90%; pointer-events: none; }
     .toast { background: var(--bg-secondary); color: var(--text-primary); padding: 12px 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: all var(--transition-base); pointer-events: auto; text-align: center; margin-bottom: 8px; border-left: 4px solid var(--accent-primary); }
     .toast.show { opacity: 1; transform: translateY(0); }
     .toast.toast-success { border-left-color: var(--color-success); }
     .toast.toast-error { border-left-color: var(--color-danger); }
     .toast.toast-warning { border-left-color: var(--color-warning); }
-
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: var(--z-modal); padding: var(--spacing-lg); }
     .modal-overlay.show { display: flex; }
     .modal-content { background: var(--bg-secondary); border-radius: var(--radius-lg); max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; padding: var(--spacing-2xl); animation: slideUp 0.3s ease; border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); }
@@ -230,7 +218,6 @@
     .modal-close:hover { color: var(--color-danger); transform: rotate(90deg); }
     .modal-body { padding: var(--spacing-sm) 0; }
     .modal-footer { display: flex; gap: var(--spacing-md); padding-top: var(--spacing-xl); border-top: 1px solid var(--border-color); margin-top: var(--spacing-xl); justify-content: flex-end; }
-
     .container { max-width: 1000px; margin: 0 auto; padding: var(--spacing-lg); min-height: 100vh; }
     .header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: var(--spacing-xl); flex-wrap: wrap; gap: var(--spacing-sm); }
     .logo { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: var(--spacing-sm); }
@@ -240,34 +227,28 @@
     .user-badge { display: flex; align-items: center; gap: var(--spacing-sm); padding: 4px 12px 4px 8px; background: var(--bg-tertiary); border-radius: var(--radius-full); font-size: 0.85rem; }
     .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #ffffff; font-weight: 600; }
     .user-name { font-size: 0.85rem; font-weight: 500; }
-
     .hero { text-align: center; padding: var(--spacing-3xl) var(--spacing-xl); background: var(--bg-secondary); border-radius: var(--radius-lg); border: 1px solid var(--border-color); margin-bottom: var(--spacing-xl); }
     .hero-icon { font-size: 3rem; margin-bottom: var(--spacing-md); }
     .hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: var(--spacing-sm); }
     .gradient-text { background: linear-gradient(135deg, var(--accent-light), #c4b5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .hero-description { font-size: 1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto var(--spacing-xl); line-height: 1.6; }
     .hero-buttons { display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap; }
-
     .whatsapp-banner { background: linear-gradient(135deg, #25D366, #128C7E); color: #ffffff; padding: var(--spacing-lg) var(--spacing-xl); border-radius: var(--radius-md); margin-bottom: var(--spacing-xl); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-md); cursor: pointer; transition: all var(--transition-base); border: 2px solid transparent; }
     .whatsapp-banner:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: rgba(255, 255, 255, 0.3); }
     .whatsapp-banner-left { display: flex; align-items: center; gap: var(--spacing-md); }
     .whatsapp-banner-icon { font-size: 1.5rem; }
     .whatsapp-banner-right { display: flex; align-items: center; gap: var(--spacing-sm); }
-
     .offline-banner { background: var(--color-orange); color: #ffffff; padding: var(--spacing-md) var(--spacing-xl); border-radius: var(--radius-md); margin-bottom: var(--spacing-xl); display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-md); }
     .offline-banner.show { display: flex; }
     .expiry-warning { background: var(--color-danger); color: #ffffff; padding: var(--spacing-md) var(--spacing-xl); border-radius: var(--radius-md); margin-bottom: var(--spacing-xl); display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-md); }
     .expiry-warning.show { display: flex; }
-
     .section-title { text-align: center; font-size: 1.3rem; font-weight: 700; margin-bottom: var(--spacing-lg); margin-top: var(--spacing-sm); }
-
     .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl); }
     .feature-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: var(--spacing-xl); border: 1px solid var(--border-color); text-align: center; transition: all var(--transition-base); }
     .feature-card:hover { border-color: var(--accent-primary); transform: translateY(-3px); box-shadow: var(--shadow-md); }
     .feature-icon { font-size: 2rem; margin-bottom: var(--spacing-sm); }
     .feature-card h4 { font-size: 1rem; font-weight: 600; margin-bottom: var(--spacing-xs); }
     .feature-card p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.5; }
-
     .price-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl); }
     .price-card { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: var(--spacing-2xl); border: 2px solid var(--border-color); text-align: center; transition: all var(--transition-base); position: relative; cursor: pointer; }
     .price-card:hover { border-color: var(--accent-primary); transform: translateY(-4px); box-shadow: var(--shadow-md); }
@@ -277,14 +258,11 @@
     .price-name { font-size: 1.2rem; font-weight: 700; }
     .price-value { font-size: 2rem; font-weight: 800; color: var(--color-success); margin: var(--spacing-sm) 0; }
     .price-duration { font-size: 0.85rem; color: var(--text-secondary); }
-
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
     .stat-card { background: var(--bg-secondary); border-radius: var(--radius-sm); padding: var(--spacing-lg); border: 1px solid var(--border-color); text-align: center; }
     .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent-light); }
     .stat-label { font-size: 0.78rem; color: var(--text-secondary); margin-top: var(--spacing-xs); }
-
     .toolbar { display: flex; gap: var(--spacing-md); flex-wrap: wrap; margin-bottom: var(--spacing-xl); }
-
     .app-list { display: grid; grid-template-columns: 1fr; gap: var(--spacing-md); }
     .app-item { background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow: hidden; transition: all var(--transition-base); }
     .app-item:hover { border-color: var(--accent-primary); }
@@ -294,7 +272,6 @@
     .app-code-count { font-size: 0.75rem; color: var(--text-muted); background: var(--bg-tertiary); padding: 2px 10px; border-radius: var(--radius-full); }
     .app-codes-container { padding: 0 var(--spacing-lg) var(--spacing-md); display: none; }
     .app-codes-container.open { display: block; }
-
     .code-item { background: var(--bg-tertiary); border-radius: var(--radius-sm); padding: var(--spacing-md); margin-bottom: var(--spacing-sm); border: 1px solid var(--border-color); transition: all var(--transition-base); }
     .code-item:hover { border-color: var(--accent-primary); }
     .code-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-sm); flex-wrap: wrap; gap: var(--spacing-sm); }
@@ -302,23 +279,19 @@
     .code-content-preview { font-family: 'Courier New', monospace; font-size: 0.8rem; color: var(--text-secondary); white-space: pre-wrap; word-wrap: break-word; max-height: 180px; overflow-y: auto; padding: var(--spacing-sm); background: var(--bg-primary); border-radius: 6px; border: 1px solid var(--border-color); display: none; }
     .code-content-preview.show { display: block; }
     .code-content-preview pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; }
-
     .empty-state { text-align: center; padding: var(--spacing-3xl) var(--spacing-lg); color: var(--text-secondary); }
     .empty-state-icon { font-size: 3rem; margin-bottom: var(--spacing-md); }
     .empty-state h3 { font-size: 1.2rem; color: var(--text-primary); margin-bottom: var(--spacing-sm); }
     .empty-state p { color: var(--text-muted); margin-bottom: var(--spacing-lg); }
-
     .admin-tabs { display: flex; gap: var(--spacing-sm); flex-wrap: wrap; margin-bottom: var(--spacing-lg); border-bottom: 1px solid var(--border-color); padding-bottom: var(--spacing-md); }
     .admin-tab { padding: 8px 16px; border: 2px solid var(--accent-primary); background: transparent; color: var(--accent-light); border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all var(--transition-base); }
     .admin-tab:hover { background: var(--accent-primary); color: #ffffff; }
     .admin-tab.active { background: var(--accent-primary); color: #ffffff; }
     .admin-tab-content { animation: fadeIn 0.3s ease; }
-
     .admin-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
     .admin-table th, .admin-table td { padding: 8px 10px; border: 1px solid var(--border-color); text-align: left; vertical-align: middle; }
     .admin-table th { background: var(--bg-hover); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
     .admin-table tr:hover { background: var(--bg-tertiary); }
-
     .chat-container { display: flex; flex-direction: column; height: 50vh; max-height: 400px; }
     .chat-messages { flex: 1; overflow-y: auto; padding: var(--spacing-md); background: var(--bg-tertiary); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md); }
     .chat-msg { margin-bottom: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-sm); max-width: 80%; word-wrap: break-word; font-size: 0.85rem; line-height: 1.4; }
@@ -331,7 +304,6 @@
     .admin-chat-user-list { max-height: 200px; overflow-y: auto; margin-bottom: var(--spacing-md); }
     .admin-chat-user-item { padding: var(--spacing-sm) var(--spacing-md); border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
     .admin-chat-user-item:hover { background: var(--bg-hover); }
-
     @media (max-width: 640px) {
       .hero h1 { font-size: 1.5rem; }
       .hero { padding: var(--spacing-2xl) var(--spacing-md); }
@@ -403,23 +375,24 @@
     </div>
   </section>
 
-  <div class="whatsapp-banner" onclick="openWhatsApp()">
+  <!-- BANNER HUBUNGI ADMIN VIA CHAT (GANTI WHATSAPP) -->
+  <div class="whatsapp-banner" onclick="hubungiAdminLanding()">
     <div class="whatsapp-banner-left">
       <span class="whatsapp-banner-icon">💬</span>
       <div>
-        <strong>Hubungi Admin untuk Aktivasi:</strong>
+        <strong>Hubungi Admin</strong>
         <br>
-        <span id="whatsappNumberLanding">+6281220285226</span>
+        <small>Butuh bantuan? Chat langsung dengan Admin.</small>
       </div>
     </div>
     <div class="whatsapp-banner-right">
-      <span>Chat WhatsApp</span>
+      <span>Chat Admin</span>
       <span style="font-size:1.2rem;">👉</span>
     </div>
   </div>
 
 <!-- ============================================================
-     BLOK 2 - FITUR & PAKET LANDING (REVISI + IKLAN)
+     BLOK 2 (R3) - FITUR & PAKET LANDING + TOMBOL GOOGLE DRIVE
      ============================================================ -->
   <h3 class="section-title">Fitur Unggulan</h3>
   <div class="features-grid">
@@ -444,9 +417,9 @@
       <p>Setiap pengguna memiliki akun dan data masing‑masing.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">📡</div>
-      <h4>Online & Offline</h4>
-      <p>Aplikasi tetap berfungsi tanpa koneksi internet.</p>
+      <div class="feature-icon">☁️</div>
+      <h4>Simpan ke Google Drive</h4>
+      <p>Backup data langsung ke Google Drive atau memori HP.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">📱</div>
@@ -460,6 +433,16 @@
     <!-- Diisi oleh JavaScript -->
   </div>
 
+  <!-- ========== TOMBOL SIMPAN KE GOOGLE DRIVE / MEMORI ========== -->
+  <div style="text-align:center;margin:30px 0;">
+    <button class="btn btn-lg" style="background:#4285F4;color:#fff;" onclick="saveToGoogleDrive()">
+      ☁️ Simpan Data ke Google Drive / Memori
+    </button>
+    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;">
+      Backup semua data Anda ke Google Drive atau simpan di memori HP.
+    </p>
+  </div>
+
   <!-- ========== IKLAN LANDING PAGE ========== -->
   <div id="landingAdContainer" style="max-width:1000px;margin:0 auto 30px auto;padding:0 var(--spacing-lg);">
     <!-- Diisi oleh renderLandingAd() -->
@@ -468,7 +451,7 @@
 <!-- END LANDING PAGE -->
 
 <!-- ============================================================
-     BLOK 3 – APPLICATION PAGE (REVISI PENERIMA PESAN)
+     BLOK 3 (R2) – APPLICATION PAGE (REVISI TERBARU)
      ============================================================ -->
 <!-- APPLICATION PAGE -->
 <div class="container hidden" id="applicationPage">
@@ -490,21 +473,6 @@
       <button onclick="downloadForOffline()" class="btn btn-blue btn-sm">Download Offline</button>
     </div>
   </header>
-
-  <div class="whatsapp-banner" onclick="openWhatsApp()">
-    <div class="whatsapp-banner-left">
-      <span class="whatsapp-banner-icon">💬</span>
-      <div>
-        <strong>Aktivasi & Bantuan:</strong>
-        <br>
-        <span id="whatsappNumberApp">+6281220285226</span>
-      </div>
-    </div>
-    <div class="whatsapp-banner-right">
-      <span>Chat Admin</span>
-      <span style="font-size:1.2rem;">👉</span>
-    </div>
-  </div>
 
   <div class="stats-grid" id="dashboardStats">
     <div class="stat-card">
@@ -539,8 +507,8 @@
       Gabung & Copy <span class="badge badge-purple">Premium</span>
     </button>
     <button onclick="showActivationModal()" class="btn btn-warning" id="activationToolbarButton" style="display:none;">🔑 Aktivasi Premium</button>
-    <!-- TOMBOL CHAT ADMIN (PENERIMA PESAN UNTUK USER BIASA) -->
     <button onclick="showChatModal()" class="btn btn-blue" id="chatButton">💬 Chat Admin</button>
+    <button onclick="showUserChatModal()" class="btn btn-info" id="chatUserButton">👥 Chat User</button>
   </div>
 
   <div id="searchBar" class="hidden" style="margin-bottom:20px;">
@@ -561,9 +529,8 @@
 </div>
 <!-- END APPLICATION PAGE -->
 
-
 <!-- ============================================================
-     BLOK 4 - MODAL AUTH
+     BLOK 4 (R1) – MODAL AUTH
      ============================================================ -->
 <!-- LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal">
@@ -663,7 +630,7 @@
 </div>
 
 <!-- ============================================================
-     BLOK 5 R2 – MODAL PROFIL & SUPER ADMIN PANEL
+     BLOK 5 (R4) – MODAL PROFIL & SUPER ADMIN PANEL (FINAL)
      ============================================================ -->
 <!-- PROFILE MODAL -->
 <div class="modal-overlay" id="profileModal">
@@ -718,7 +685,6 @@
         <button class="admin-tab" onclick="switchAdminTab('packages')" id="tabPackages">Paket & Harga</button>
         <button class="admin-tab" onclick="switchAdminTab('security')" id="tabSecurity">Log Keamanan</button>
         <button class="admin-tab" onclick="switchAdminTab('settings')" id="tabSettings">Pengaturan</button>
-        <button class="admin-tab" onclick="switchAdminTab('chat')" id="tabChat">💬 Chat User</button>
         <button class="admin-tab" onclick="switchAdminTab('iklan')" id="tabIklan">📢 Iklan</button>
         <button class="admin-tab" onclick="switchAdminTab('backup')" id="tabBackup">💾 Backup</button>
       </div>
@@ -790,27 +756,6 @@
         <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;text-align:center;">Perhatian: Semua data user, aplikasi, dan pengaturan akan dihapus permanen!</p>
       </div>
 
-      <div class="admin-tab-content hidden" id="adminTabChat">
-        <h4 style="margin-bottom:12px;">💬 Chat dengan User</h4>
-        <div style="margin-bottom:12px;">
-          <label style="font-size:0.85rem;color:var(--text-secondary);display:block;margin-bottom:4px;">Pilih User:</label>
-          <select id="adminChatUserSelect" onchange="setAdminChatTarget(this.value)" style="width:100%;padding:8px;border-radius:var(--radius-sm);background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color-strong);">
-            <option value="">-- Pilih User --</option>
-          </select>
-        </div>
-        <div class="chat-messages" id="adminChatMessages" style="height:250px;overflow-y:auto;background:var(--bg-tertiary);border-radius:var(--radius-sm);padding:8px;margin-bottom:12px;">
-          <p style="color:var(--text-secondary);text-align:center;padding:20px;">Pilih user untuk memulai chat.</p>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input type="text" id="adminChatInput" placeholder="Ketik balasan..." style="flex:1;">
-          <button onclick="sendAdminChat()" class="btn btn-primary btn-sm">Kirim</button>
-        </div>
-        <hr style="border-color:var(--border-color);margin:16px 0;">
-        <h4 style="margin-bottom:8px;">📢 Chat Massal ke Semua User</h4>
-        <textarea id="massChatMessage" rows="3" placeholder="Tulis pesan untuk semua user..." style="margin-bottom:8px;"></textarea>
-        <button onclick="sendMassChat()" class="btn btn-warning btn-block">Kirim ke Semua User</button>
-      </div>
-
       <div class="admin-tab-content hidden" id="adminTabIklan">
         <h4 style="margin-bottom:12px;">📢 Edit Iklan Halaman Depan</h4>
         <div class="form-group">
@@ -832,7 +777,6 @@
         <div id="adSaveResult" style="margin-top:12px;"></div>
       </div>
 
-      <!-- TAB BACKUP & RESTORE -->
       <div class="admin-tab-content hidden" id="adminTabBackup">
         <h4 style="margin-bottom:12px;">💾 Backup & Restore Data</h4>
         <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px;">
@@ -849,6 +793,13 @@
           📤 Restore HTML
           <input type="file" accept=".html" onchange="restoreFromHTML(this)" hidden>
         </label>
+        <hr style="border-color:var(--border-color);margin:16px 0;">
+        <button onclick="saveToGoogleDrive()" class="btn btn-primary btn-block" style="background:#4285F4;">
+          ☁️ Simpan ke Google Drive / Memori
+        </button>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;text-align:center;">
+          Backup data langsung ke Google Drive atau simpan di memori HP.
+        </p>
       </div>
     </div>
     <div class="modal-footer">
@@ -858,7 +809,7 @@
 </div>
 
 <!-- ============================================================
-     BLOK 6 - MODAL CRUD (APP, CODE, MERGE, CONFIRM, PACKAGE)
+     BLOK 6 (R1) – MODAL CRUD (APP, CODE, MERGE, CONFIRM, PACKAGE)
      ============================================================ -->
 <!-- ADD/EDIT APP MODAL -->
 <div class="modal-overlay" id="appModal">
@@ -993,8 +944,7 @@
 </div>
 
 <!-- ============================================================
-     BLOK 7 – MODAL CHAT, AKTIVASI & TOAST CONTAINER
-     (REVISI: + MODAL CHAT SESAMA USER)
+     BLOK 7 (R1) - MODAL CHAT, AKTIVASI & TOAST CONTAINER
      ============================================================ -->
 <!-- CHAT MODAL (USER KE ADMIN) -->
 <div class="modal-overlay" id="chatModal">
@@ -1077,7 +1027,7 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <!-- ============================================================
-     BLOK 8 - JS CORE 1 (VERSI AMAN)
+     BLOK 8 (R2) - JS CORE 1 (VERSI AMAN)
      ============================================================ -->
 </body>
 <script>
@@ -1311,7 +1261,7 @@ function activatePremium(code, errId, sucId) {
 </script>
 
 <!-- ============================================================
-     BLOK 9 - JS CORE 2 (VERSI AMAN)
+     BLOK 9 (R2) - JS CORE 2 (VERSI AMAN)
      ============================================================ -->
 <script>
 // ---------- FORGOT PASSWORD ----------
@@ -1603,7 +1553,7 @@ function checkAllExpiredActivations() {
 </script>
 
 <!-- ============================================================
-     BLOK 10 R2 - JS ADMIN
+     BLOK 10 (R3) – JS ADMIN (LENGKAP + GOOGLE DRIVE)
      ============================================================ -->
 <script>
 // ---------- SUPER ADMIN PANEL ----------
@@ -1624,7 +1574,6 @@ function switchAdminTab(tab) {
   if(tab==='users') renderAdminUserList();
   if(tab==='packages') renderPackageEditList();
   if(tab==='security') renderSecurityLogs();
-  if(tab==='chat') renderAdminChat();
   if(tab==='codes') renderActiveCodesList();
   if(tab==='backup') { /* konten sudah statis di HTML */ }
   if(tab==='iklan') loadAdSettings();
@@ -1825,39 +1774,38 @@ function restoreFromHTML(input) {
   reader.readAsText(file);
 }
 
-// ========== CHAT ADMIN ==========
-function renderAdminChat() {
-  var allMessages = getChatMessages(); var userList = [];
-  for (var i=0; i<allMessages.length; i++) { var m = allMessages[i]; var other = (m.from==='admin')?m.to:m.from; if (other!=='admin'&&other!=='all'&&userList.indexOf(other)===-1) userList.push(other); }
-  var select = document.getElementById('adminChatUserSelect');
-  if (select) { select.innerHTML = '<option value="">-- Pilih User --</option>'; var users = getAllUsers(); for (var i=0; i<users.length; i++) { if (userList.indexOf(users[i].username)!==-1&&users[i].role!=='superadmin') { select.innerHTML += '<option value="'+users[i].username+'">'+users[i].nama+' ('+users[i].username+')</option>'; } } }
-  document.getElementById('adminChatMessages').innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:20px;">Pilih user untuk melihat chat.</p>';
+// ========== SIMPAN KE GOOGLE DRIVE / MEMORI ==========
+function saveToGoogleDrive() {
+  var allData = {};
+  for (var i = 0; i < localStorage.length; i++) {
+    var key = localStorage.key(i);
+    allData[key] = localStorage.getItem(key);
+  }
+  var jsonStr = JSON.stringify(allData, null, 2);
+  var blob = new Blob([jsonStr], { type: 'application/json' });
+  var file = new File([blob], 'notepad_backup_' + new Date().toISOString().slice(0,10) + '.json', { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({
+      title: 'Backup Notepad+',
+      text: 'Simpan file backup Notepad+ ke Google Drive atau memori.',
+      files: [file]
+    }).then(function() {
+      showToast('✅ File berhasil dibagikan! Pilih Google Drive untuk menyimpan.', 'success');
+    }).catch(function(err) {
+      downloadBackupFile(blob);
+    });
+  } else {
+    downloadBackupFile(blob);
+  }
 }
-function setAdminChatTarget(username) { if (!username) return; loadAdminChat(username); }
-function loadAdminChat(username) {
-  var allMessages = getChatMessages(); var filtered = [];
-  for (var i=0; i<allMessages.length; i++) { var m = allMessages[i]; if ((m.from==='admin'&&m.to===username)||(m.from===username&&m.to==='admin')) filtered.push(m); }
-  var container = document.getElementById('adminChatMessages'); if (!container) return;
-  if (filtered.length===0) { container.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:20px;">Belum ada chat dengan '+username+'.</p>'; return; }
-  filtered.sort(function(a,b){ return new Date(a.time)-new Date(b.time); });
-  var html = ''; for (var i=0; i<filtered.length; i++) { var m = filtered[i]; var isAdmin = (m.from==='admin'); var cls = isAdmin?'chat-msg admin':'chat-msg user'; var sender = isAdmin?'Admin':m.from; html += '<div class="'+cls+'"><div class="chat-sender">'+sender+'</div>'+m.text+'<div class="chat-time">'+new Date(m.time).toLocaleString()+'</div></div>'; }
-  container.innerHTML = html; container.scrollTop = container.scrollHeight;
-}
-function sendAdminChat() {
-  var select = document.getElementById('adminChatUserSelect'); var target = select?select.value:''; if (!target) { showToast('Pilih user!','error'); return; }
-  var input = document.getElementById('adminChatInput'); var text = input.value.trim(); if (!text) return;
-  var msgs = getChatMessages(); msgs.push({ from:'admin', to:target, text:text, time:new Date().toISOString() }); saveChatMessages(msgs); input.value=''; loadAdminChat(target);
-  showToast('Balasan terkirim ke '+target, 'success');
-}
-function sendMassChat() {
-  var textarea = document.getElementById('massChatMessage'); var text = textarea.value.trim(); if (!text) { showToast('Tulis pesan!','error'); return; }
-  var users = getAllUsers(); var msgs = getChatMessages(); var count = 0;
-  for (var i=0; i<users.length; i++) { if (users[i].role!=='superadmin') { msgs.push({ from:'admin', to:users[i].username, text:text, time:new Date().toISOString() }); count++; } }
-  msgs.push({ from:'admin', to:'all', text:text, time:new Date().toISOString() }); saveChatMessages(msgs); textarea.value = '';
-  showToast('Pesan massal terkirim ke '+count+' user!', 'success');
+function downloadBackupFile(blob) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'notepad_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  showToast('⬇ File backup didownload. Simpan ke Google Drive secara manual.', 'success');
 }
 </script>
-
 
 <!-- ============================================================
      BLOK 11 - JS CHAT, LANDING DISPLAY, OFFLINE, INIT (REVISI)
