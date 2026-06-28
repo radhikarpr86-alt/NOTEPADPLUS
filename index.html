@@ -1313,9 +1313,10 @@ function activatePremium(code, errId, sucId) {
 </script>
 
 <!-- ============================================================
-     BLOK 9 R5 – JS CORE 2
+     BLOK 9 R5 – JS CORE 2 (LENGKAP + PERBAIKAN MERGE)
      Revisi 5: Penyimpanan ganda (ID + username), auto-save,
-     backup sebelum upgrade, perbaikan data hilang
+     backup sebelum upgrade, perbaikan data hilang,
+     PERBAIKAN: performMerge() sekarang mengurutkan kode
      Semua fungsi asli R4 tetap utuh, tidak diubah
      ============================================================ -->
 <script>
@@ -1629,24 +1630,91 @@ function performSearch() {
 }
 function clearSearch() { document.getElementById('searchInput').value=''; performSearch(); }
 
-// ---------- MERGE ----------
+// ================================================================
+// PERBAIKAN UTAMA: FUNGSI MERGE (SEKARANG MENGURUTKAN KODE)
+// ================================================================
 function showMergeModal() {
   var s = getSession();
   if(!s||(!s.premium&&s.role!=='superadmin')){ showToast('Fitur khusus Premium!','error'); return; }
   var apps = getAllApps()[s.id]||[];
   document.getElementById('mergeAppList').innerHTML = apps.map(function(a){
-    return '<label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;"><input type="checkbox" checked value="'+a.id+'"> '+a.name+'</label>';
+    return '<label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;"><input type="checkbox" checked value="'+a.id+'"> '+escapeHTML(a.name)+'</label>';
   }).join('');
   document.getElementById('mergeResult').classList.add('hidden'); document.getElementById('mergeOutput').value='';
   openModal('mergeModal');
 }
+
+// ========== FUNGSI MERGE YANG SUDAH DIPERBAIKI ==========
 function performMerge() {
-  var s = getSession(); var apps = getAllApps()[s.id]||[];
-  var checked = Array.from(document.querySelectorAll('#mergeAppList input:checked')).map(function(i){return i.value;});
-  var merged = apps.filter(function(a){return checked.includes(a.id);}).flatMap(function(a){return a.codes;}).map(function(c){return c.content;}).join('\n\n');
+  var s = getSession();
+  var apps = getAllApps()[s.id] || [];
+  
+  // Ambil ID aplikasi yang dicentang
+  var checked = Array.from(document.querySelectorAll('#mergeAppList input:checked')).map(function(i) {
+    return i.value;
+  });
+  
+  // Kumpulkan SEMUA kode dari aplikasi yang dipilih
+  var allCodes = [];
+  for (var i = 0; i < apps.length; i++) {
+    if (checked.includes(apps[i].id)) {
+      var codes = apps[i].codes || [];
+      for (var j = 0; j < codes.length; j++) {
+        allCodes.push({
+          appName: apps[i].name,
+          codeName: codes[j].name,
+          content: codes[j].content
+        });
+      }
+    }
+  }
+  
+  // URUTKAN berdasarkan angka di nama kode (1,2,3,...,10,... bukan 1,10,2,...)
+  allCodes.sort(function(a, b) {
+    var nameA = a.codeName || '';
+    var nameB = b.codeName || '';
+    
+    // Cari angka pertama di nama
+    var matchA = nameA.match(/(\d+)/);
+    var matchB = nameB.match(/(\d+)/);
+    var numA = matchA ? parseInt(matchA[1]) : NaN;
+    var numB = matchB ? parseInt(matchB[1]) : NaN;
+    
+    // Angka duluan
+    if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+    if (!isNaN(numA)) return -1;
+    if (!isNaN(numB)) return 1;
+    
+    // Kalau tidak ada angka, urutkan A-Z
+    return nameA.localeCompare(nameB);
+  });
+  
+  // Gabungkan semua kode yang sudah diurutkan
+  var merged = '';
+  for (var k = 0; k < allCodes.length; k++) {
+    var code = allCodes[k];
+    
+    // Komentar pemisah dengan nama aplikasi dan kode
+    merged += '<!-- ===== ' + code.appName + ' → ' + code.codeName + ' ===== -->\n';
+    merged += code.content;
+    
+    // Spasi antar kode
+    if (k < allCodes.length - 1) {
+      merged += '\n\n\n';
+    }
+  }
+  
+  // Tampilkan hasil
   document.getElementById('mergeOutput').value = merged;
   document.getElementById('mergeResult').classList.remove('hidden');
+  
+  // Scroll otomatis ke hasil
+  document.getElementById('mergeResult').scrollIntoView({ behavior: 'smooth' });
+  
+  // Notifikasi sukses
+  showToast('✅ ' + allCodes.length + ' kode berhasil digabung dan diurutkan!', 'success');
 }
+
 function copyMergeResult() {
   var ta = document.getElementById('mergeOutput'); ta.select(); navigator.clipboard.writeText(ta.value).then(function(){ showToast('Disalin!','success'); });
 }
@@ -1857,7 +1925,7 @@ setInterval(function() {
 window.addEventListener('beforeunload', function() { autoSaveData(); });
 document.addEventListener('visibilitychange', function() { if (document.hidden) { autoSaveData(); } });
 
-console.log('✅ Blok 9 R5 terpasang: Penyimpanan ganda, auto-save, backup upgrade.');
+console.log('✅ Blok 9 R5 terpasang: Penyimpanan ganda, auto-save, backup upgrade, MERGE SUDAH DIURUTKAN.');
 </script>
 <!-- ============================================================
      AKHIR BLOK 9 R5
@@ -2414,16 +2482,4 @@ window.addEventListener('online',updateOnlineStatus); window.addEventListener('o
   });
 
   var origUpdateHeader = window.updateHeaderUser;
-  if (origUpdateHeader) {
-    window.updateHeaderUser = function() {
-      origUpdateHeader();
-      patchSuperadminHeader();
-    };
-  }
-
-  console.log('✅ Blok 11 R3 terpasang: Chat user‑to‑user, enkripsi, dan perbaikan Superadmin.');
-})();
-</script>
-<!-- ============================================================
-     AKHIR BLOK 11 R3
-     ============================================================ -->
+  if (origUpdateHea
