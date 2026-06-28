@@ -2421,6 +2421,181 @@ window.addEventListener('online',updateOnlineStatus); window.addEventListener('o
     }
   }
 
+// ================================================================
+// FITUR GABUNG SEMUA CODE + DOWNLOAD PER CODE
+// ================================================================
+
+/**
+ * Tampilkan modal yang berisi semua code dari semua aplikasi user
+ */
+function showMergeAllCodes() {
+  var session = getSession();
+  if (!session) {
+    showToast('Login dulu!', 'error');
+    return;
+  }
+
+  var allApps = getAllApps();
+  var userApps = allApps[session.id] || [];
+  var container = document.getElementById('mergeAllCodeList');
+
+  // Kumpulkan semua code dari semua aplikasi
+  var allCodes = [];
+  userApps.forEach(function(app) {
+    (app.codes || []).forEach(function(code) {
+      allCodes.push({
+        appName: app.name,
+        code: code
+      });
+    });
+  });
+
+  if (allCodes.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Belum ada kode sama sekali.</p>';
+    openModal('mergeAllModal');
+    return;
+  }
+
+  // Buat HTML daftar code
+  var html = '';
+  allCodes.forEach(function(item, index) {
+    var code = item.code;
+    var appName = item.appName;
+    var fileName = (code.name || 'code_' + (index+1)) + '.html';
+
+    // Escape konten untuk preview
+    var previewContent = escapeHTML(code.content);
+
+    html += `
+      <div style="border-bottom:1px solid var(--border-color);padding:10px 0;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+          <div>
+            <strong>📄 ${escapeHTML(code.name)}</strong>
+            <span style="font-size:0.8rem;color:var(--text-muted);margin-left:8px;">(dari: ${escapeHTML(appName)})</span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-success btn-sm" onclick="downloadSingleCode('${code.id}', '${appName}')">⬇ Download</button>
+            <button class="btn btn-gray btn-sm" onclick="toggleCodePreviewMerge('${code.id}')">👁 Preview</button>
+          </div>
+        </div>
+        <div id="previewMerge_${code.id}" class="code-content-preview" style="display:none;margin-top:8px;">
+          <pre>${previewContent}</pre>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+  openModal('mergeAllModal');
+}
+
+/**
+ * Toggle preview untuk satu code di modal gabungan
+ */
+function toggleCodePreviewMerge(codeId) {
+  var el = document.getElementById('previewMerge_' + codeId);
+  if (el) {
+    el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+  }
+}
+
+/**
+ * Download satu kode sebagai file HTML
+ */
+function downloadSingleCode(codeId, appName) {
+  var session = getSession();
+  if (!session) return;
+
+  var allApps = getAllApps();
+  var userApps = allApps[session.id] || [];
+  var found = null;
+
+  // Cari code berdasarkan id
+  for (var i = 0; i < userApps.length; i++) {
+    var app = userApps[i];
+    for (var j = 0; j < (app.codes || []).length; j++) {
+      if (app.codes[j].id === codeId) {
+        found = {
+          code: app.codes[j],
+          appName: app.name
+        };
+        break;
+      }
+    }
+    if (found) break;
+  }
+
+  if (!found) {
+    showToast('Kode tidak ditemukan.', 'error');
+    return;
+  }
+
+  var content = found.code.content;
+  var fileName = (found.code.name || 'code') + '.html';
+
+  // Buat blob dan download
+  var blob = new Blob([content], { type: 'text/html' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+
+  showToast('✅ ' + fileName + ' berhasil didownload!', 'success');
+}
+
+/**
+ * Download semua kode yang digabung menjadi satu file HTML
+ */
+function downloadAllMerged() {
+  var session = getSession();
+  if (!session) return;
+
+  var allApps = getAllApps();
+  var userApps = allApps[session.id] || [];
+  var allCodes = [];
+
+  userApps.forEach(function(app) {
+    (app.codes || []).forEach(function(code) {
+      allCodes.push({
+        appName: app.name,
+        code: code
+      });
+    });
+  });
+
+  if (allCodes.length === 0) {
+    showToast('Tidak ada kode untuk digabung.', 'warning');
+    return;
+  }
+
+  // Buat konten gabungan dengan separator
+  var mergedContent = '';
+  allCodes.forEach(function(item, idx) {
+    var code = item.code;
+    var appName = item.appName;
+    mergedContent += '<!-- ===== ' + (code.name || 'Code ' + (idx+1)) + ' (dari ' + appName + ') ===== -->\n';
+    mergedContent += code.content;
+    if (idx < allCodes.length - 1) mergedContent += '\n\n';
+  });
+
+  // Download
+  var blob = new Blob([mergedContent], { type: 'text/html' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'gabungan_semua_code.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+
+  showToast('✅ Gabungan semua code berhasil didownload!', 'success');
+}
+     
   // ---------- CHAT USER‑TO‑USER ----------
   window.showUserChatModal = function() {
     var s = getSession();
